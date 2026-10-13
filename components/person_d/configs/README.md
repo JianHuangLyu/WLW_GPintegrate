@@ -23,7 +23,8 @@ python -c "import json, torch; from pathlib import Path; from conch.open_clip_cu
 | `extraction.prompts_path` | Attribute vocabulary, option descriptions, multi-select attributes, and PLIP/CONCH prompts. |
 | `extraction.prompts_sha256` | Required SHA-256 of the prompt asset, checked at the start of every native run; a mismatch fails. |
 | `extraction.example_dir` | Few-shot `ROI_Analysis/<group>/<attribute>/<option>/` images; required when `use_example_prototypes` is true. |
-| `extraction.example_tree_sha256` | Required tree hash of `example_dir` (algorithm in `external-assets.yaml`) when `use_example_prototypes` is true, checked before the models load; a mismatch fails. |
+| `extraction.example_tree_sha256` | Required tree hash of `example_dir` (algorithm in `external-assets.yaml`) when `use_example_prototypes` is true, checked before the models load; a mismatch fails. Every file must also sit in a `<group>/<attribute>/<option>/` image folder the loader reads. |
+| `extraction.plip.support_files_sha256` | Required SHA-256 of the five PLIP snapshot files read besides `pytorch_model.bin` (`config.json`, `preprocessor_config.json`, `special_tokens_map.json`, `tokenizer.json`, `tokenizer_config.json`), checked before the models load; a mismatch fails. |
 | `extraction.plip.weight_path` | Local `vinid/plip` snapshot directory. `revision` records the expected Hugging Face revision. |
 | `extraction.conch.checkpoint_path` | Local CONCH `pytorch_model.bin`; `model_name` selects the CONCH model config. |
 | `extraction.plip.sha256`, `extraction.conch.sha256` | Expected SHA-256 of PLIP `pytorch_model.bin` and the CONCH checkpoint, checked before loading; a mismatch fails. `null` leaves the file unverified and is recorded in H. CONCH loads with `strict=False`, so set its value once the gated file is obtained. |
@@ -38,4 +39,4 @@ python -c "import json, torch; from pathlib import Path; from conch.open_clip_cu
 | `matching.condition_weights` | Weight in [-1, 1] for each informative condition: `Must_True`, `High_Possibly_True`, `Low_Possibly_True`, `Must_False`. |
 | `matching.score_threshold` | Selected requires `score >= score_threshold`, within [-1, 1]. |
 | `matching.min_evaluated_attributes` | Fewer evaluated attributes yields `skipped` with `insufficient_visual_evidence`. |
-| `matching.unverified_must_true` | What happens when an attribute with a Must_True option cannot be evaluated: `skip` gives `skipped` / `insufficient_visual_evidence`, `reject` gives `rejected` / `must_condition_failed`. Either way the query is never `selected`. |
+| `matching.unverified_must_true` | What happens when a Must condition cannot be verified, either because an attribute with a Must_True option was not evaluated or because a Must_True / Must_False option cannot be reached by any vocabulary label (`MAPPING.md`): `skip` gives `skipped` / `insufficient_visual_evidence`, `reject` gives `rejected` / `must_condition_failed`. Either way the query is never `selected`. |

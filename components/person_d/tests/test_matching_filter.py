@@ -5,12 +5,8 @@ import json
 import unittest
 from pathlib import Path
 
-from components.person_d.matching_filter import (
-    LabelMap,
-    MatchingSettings,
-    evaluate_attribute,
-    match_query,
-)
+from components.person_d import matching_filter
+from components.person_d.matching_filter import LabelMap, MatchingSettings, evaluate_attribute
 
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
@@ -48,6 +44,21 @@ def histologic_criteria() -> dict:
     g = json.loads((EXAMPLES / "G_queries.valid.json").read_text(encoding="utf-8"))
     record = g["payload"]["case_list"][0]["structured_report"]["DxItems"]["Histologic_Type"]
     return record["visualAttrQueries"][0]["diagnosticCriteria"]
+
+
+def full_vocabulary(criteria: dict) -> dict:
+    """A vocabulary that has one label for every criteria option, so every option is reachable."""
+
+    return {
+        category: {attribute: list(spec["options"]) for attribute, spec in attributes.items()}
+        for category, attributes in criteria["visualAttrs"].items()
+    }
+
+
+def match_query(extracted, criteria, label_map, settings, vocabulary=None):
+    if vocabulary is None:
+        vocabulary = full_vocabulary(criteria)
+    return matching_filter.match_query(extracted, criteria, label_map, settings, vocabulary)
 
 
 def without_must_true(criteria: dict) -> dict:
@@ -165,6 +176,44 @@ class MatchingFilterTests(unittest.TestCase):
         result = match_query(extracted, self.criteria, self.label_map, strict)
         self.assertEqual(("rejected", "must_condition_failed"), (result["status"], result["reason"]))
         self.assertIn("Architecture.Tumour_Border", result["failed_attributes"])
+
+    def test_unreachable_must_false_option_is_never_selected(self) -> None:
+        criteria = without_must_true(self.criteria)
+        vocabulary = full_vocabulary(criteria)
+        chromatin = criteria["visualAttrs"]["Cellular_and_Nuclear"]["Chromatin"]
+        forbidden = next(o for o, c in chromatin["conditions"].items() if c == "Must_False")
+        vocabulary["Cellular_and_Nuclear"]["Chromatin"].remove(forbidden)
+
+        result = match_query(SUPPORTING, criteria, self.label_map, self.settings, vocabulary)
+        self.assertEqual(("skipped", "insufficient_visual_evidence"), (result["status"], result["reason"]))
+        self.assertFalse(result["must_false_passed"])
+        self.assertEqual(["Cellular_and_Nuclear.Chromatin"], result["must_unverifiable"])
+        self.assertEqual(
+            {"Must_False": [forbidden]},
+            result["attributes"]["Cellular_and_Nuclear.Chromatin"]["unreachable_must"],
+        )
+
+        strict = MatchingSettings.from_config({**SETTINGS, "unverified_must_true": "reject"})
+        result = match_query(SUPPORTING, criteria, self.label_map, strict, vocabulary)
+        self.assertEqual(("rejected", "must_condition_failed"), (result["status"], result["reason"]))
+
+    def test_unreachable_must_true_option_makes_a_miss_unverified_not_failed(self) -> None:
+        border = self.criteria["visualAttrs"]["Architecture"]["Tumour_Border"]
+        required = next(o for o, c in border["conditions"].items() if c == "Must_True")
+        other = next(
+            o for o, c in border["conditions"].items()
+            if c not in {"Must_True", "Must_False", "Negligible", "Not_Mentioned"}
+        )
+        extracted = {"Architecture": {"Tumour_Border": [other]}}
+        result = match_query(extracted, self.criteria, self.label_map, self.settings)
+        self.assertEqual(("rejected", "must_condition_failed"), (result["status"], result["reason"]))
+
+        vocabulary = full_vocabulary(self.criteria)
+        vocabulary["Architecture"]["Tumour_Border"].remove(required)
+        result = match_query(extracted, self.criteria, self.label_map, self.settings, vocabulary)
+        self.assertEqual(("skipped", "insufficient_visual_evidence"), (result["status"], result["reason"]))
+        self.assertFalse(result["must_true_passed"])
+        self.assertIn("Architecture.Tumour_Border", result["must_unverifiable"])
 
     def test_score_below_threshold_rejects(self) -> None:
         settings = MatchingSettings.from_config({**SETTINGS, "score_threshold": 0.5})

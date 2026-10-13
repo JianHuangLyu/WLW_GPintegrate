@@ -1,5 +1,5 @@
 {
-  "description": "native-mode structure for E_rois.valid.json + G_queries.valid.json; one event per ROI and query; queries 001/002 (real criteria) list the allowed values; synthetic queries 004/005 must be selected/rejected; every matched event must follow score_rule (configs/native.example.json matching)",
+  "description": "native-mode structure for E_rois.valid.json + G_queries.valid.json; one event per ROI and query; queries 001/002 (real criteria with Must_False options the vocabulary cannot reach) list the allowed values and can never be selected; synthetic queries 004/005 must be selected/rejected; every matched event must follow score_rule (configs/native.example.json matching)",
   "case_id": "case-001",
   "producer": "person-d/visual-filter:0.2.0",
   "models_loaded": true,
@@ -97,14 +97,11 @@
       "dx_pair_id": "case-001-dx-001",
       "query_id": "case-001-query-001",
       "status_in": [
-        "selected",
         "rejected",
         "skipped"
       ],
       "reason_in": [
-        "visual_attributes_match",
         "must_condition_failed",
-        "score_below_threshold",
         "insufficient_visual_evidence"
       ]
     },
@@ -127,14 +124,11 @@
       "dx_pair_id": "case-001-dx-002",
       "query_id": "case-001-query-002",
       "status_in": [
-        "selected",
         "rejected",
         "skipped"
       ],
       "reason_in": [
-        "visual_attributes_match",
         "must_condition_failed",
-        "score_below_threshold",
         "insufficient_visual_evidence"
       ]
     },
@@ -150,14 +144,11 @@
       "dx_pair_id": "case-001-dx-001",
       "query_id": "case-001-query-001",
       "status_in": [
-        "selected",
         "rejected",
         "skipped"
       ],
       "reason_in": [
-        "visual_attributes_match",
         "must_condition_failed",
-        "score_below_threshold",
         "insufficient_visual_evidence"
       ]
     },
@@ -180,14 +171,11 @@
       "dx_pair_id": "case-001-dx-002",
       "query_id": "case-001-query-002",
       "status_in": [
-        "selected",
         "rejected",
         "skipped"
       ],
       "reason_in": [
-        "visual_attributes_match",
         "must_condition_failed",
-        "score_below_threshold",
         "insufficient_visual_evidence"
       ]
     },

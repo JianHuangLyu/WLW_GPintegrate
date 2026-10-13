@@ -41,6 +41,17 @@ def _load(name: str) -> dict:
     return json.loads((EXAMPLES / name).read_text(encoding="utf-8"))
 
 
+def _full_vocabulary(g: dict) -> dict:
+    """One vocabulary label per criteria option of the example G, so every option is reachable."""
+
+    record = g["payload"]["case_list"][0]["structured_report"]["DxItems"]["Histologic_Type"]
+    criteria = record["visualAttrQueries"][0]["diagnosticCriteria"]
+    return {
+        category: {attribute: list(spec["options"]) for attribute, spec in attributes.items()}
+        for category, attributes in criteria["visualAttrs"].items()
+    }
+
+
 def _with_evaluation_mode(g: dict) -> dict:
     g = copy.deepcopy(g)
     g["payload"]["data_mode"] = "evaluation"
@@ -105,7 +116,7 @@ class NativeVisualFilterTests(unittest.TestCase):
         self.e = _load("E_rois.valid.json")
         self.g = _load("G_queries.valid.json")
 
-    def _build(self, extractor: _FakeExtractor, e=None, g=None, reader=None):
+    def _build(self, extractor: _FakeExtractor, e=None, g=None, reader=None, vocabulary=None):
         loads: list[int] = []
 
         def factory() -> _FakeExtractor:
@@ -119,6 +130,7 @@ class NativeVisualFilterTests(unittest.TestCase):
             extractor_factory=factory,
             image_reader=reader or _FakeReader(),
             extraction_info={"backend": "plip+conch"},
+            vocabulary=vocabulary or _full_vocabulary(self.g),
         )
         return artifact, loads
 
@@ -284,6 +296,38 @@ class NativeVisualFilterTests(unittest.TestCase):
                 build_example_artifact(e, g, "person-d/visual-filter:0.2.0")
             with self.assertRaisesRegex(ValueError, message):
                 self._build(_FakeExtractor({}), e=e, g=g)
+
+    def test_criteria_option_the_vocabulary_cannot_reach_blocks_selection(self) -> None:
+        vocabulary = _full_vocabulary(self.g)
+        vocabulary["Architecture"]["Pattern"].remove("Simple Tubular/Branching Structures")
+        extractor = _FakeExtractor(
+            {
+                "case-001-case-001-he-roi-001": POSITIVE,
+                "case-001-case-001-he-roi-002": POSITIVE,
+            }
+        )
+        artifact, _ = self._build(extractor, vocabulary=vocabulary)
+        validate_artifact(artifact, "H.MatchedROIs")
+        for stain, roi in iter_rois(artifact["payload"]):
+            if stain["stain_id"] != "case-001-he":
+                continue
+            events = {event["query_id"]: event for event in roi["selection_history"][1:]}
+            matching = roi["visualAttrs_info"]["matching"]
+            # In the real criteria this option is Must_False, and the vocabulary cannot reach it.
+            self.assertEqual("skipped", events["case-001-query-001"]["status"])
+            self.assertIn("Architecture.Pattern", matching["case-001-query-001"]["must_unverifiable"])
+            # The synthetic queries carry no Must condition, so reachability does not affect them.
+            self.assertEqual("selected", events["case-001-query-004"]["status"])
+            self.assertEqual("rejected", events["case-001-query-005"]["status"])
+
+    def test_malformed_criteria_fail_at_the_input_boundary(self) -> None:
+        g = copy.deepcopy(self.g)
+        record = g["payload"]["case_list"][0]["structured_report"]["DxItems"]["Histologic_Type"]
+        del record["visualAttrQueries"][0]["diagnosticCriteria"]["version"]
+        with self.assertRaisesRegex(ValueError, "case-001-query-001 diagnosticCriteria is missing 'version'"):
+            self._build(_FakeExtractor({}), g=g)
+        with self.assertRaisesRegex(ValueError, "diagnosticCriteria is missing 'version'"):
+            build_example_artifact(self.e, g, "person-d/visual-filter:0.2.0")
 
     def test_label_map_digest_is_enforced(self) -> None:
         self.config["matching"]["label_map_sha256"] = "0" * 64

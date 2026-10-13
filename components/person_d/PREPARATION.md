@@ -249,9 +249,11 @@ components/person_d/examples/
 ├── G_queries.valid.json
 ├── synthetic_slide.<supported-format>
 ├── H_matches.expected.json
-├── config.example.json
 └── README.md
 ```
+
+config 不放在 `examples/`：`contracts/paths.py` 只接受 `components/person_d/configs/` 下的 config，
+canonical example 使用 `configs/example.json` 與 `configs/native.example.json`。
 
 範例需覆蓋 selected、rejected、skipped、unmapped query、非 reference WSI 與空 ROI case；所有輸出 ROI
 數量和 ID 必須與 E 一致。使用合成 slide，不提交 PHI。模型非決定性時定義 score 容許誤差與最終狀態

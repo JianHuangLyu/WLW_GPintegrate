@@ -139,11 +139,24 @@ class VisualAttributeExtractionTests(unittest.TestCase):
     def test_example_tree_digest_is_enforced(self) -> None:
         from components.person_d.assets import tree_sha256
 
+        attributes = VOCABULARY["attributes"]
         _, digest = tree_sha256(self.example_dir)
-        self.extraction.verify_example_tree(self.example_dir, digest)
+        self.assertEqual(
+            {"file_count": 1, "usable_file_count": 1},
+            self.extraction.verify_example_tree(self.example_dir, digest, attributes),
+        )
         Image.new("RGB", (4, 4)).save(self.example_dir / "Architecture" / "Pattern" / "Solid" / "extra.png")
         with self.assertRaisesRegex(ValueError, r"example tree \(2 files\) SHA-256 mismatch"):
-            self.extraction.verify_example_tree(self.example_dir, digest)
+            self.extraction.verify_example_tree(self.example_dir, digest, attributes)
+
+    def test_example_file_outside_an_option_folder_fails(self) -> None:
+        from components.person_d.assets import tree_sha256
+
+        attributes = VOCABULARY["attributes"]
+        Image.new("RGB", (4, 4)).save(self.example_dir / "Architecture" / "Pattern" / "stray.png")
+        _, digest = tree_sha256(self.example_dir)
+        with self.assertRaisesRegex(ValueError, "1 file.*Architecture/Pattern/stray.png"):
+            self.extraction.verify_example_tree(self.example_dir, digest, attributes)
 
     def test_prompt_asset_digest_is_enforced(self) -> None:
         import json

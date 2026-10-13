@@ -1,6 +1,8 @@
 compatible_contracts: [E.ROIs@2.0, G.VisualAttributeQueries@2.0, H.MatchedROIs@2.0]
 # The pinned digests are also in configs/native*.json (*sha256 keys); every native run and
 # `python -m components.person_d.verify_assets` fail when an asset differs from them.
+# mapping_acceptance.json records the accepted vocabulary-to-criteria mapping of the prompt asset
+# and the label map below (see MAPPING.md); verify_assets and tests/test_mapping.py check it.
 assets:
   - asset_id: plip
     type: model_weight
@@ -9,12 +11,18 @@ assets:
     revision: "67ade53ddd32195868f422585f72698ef5d15094"
     source: "https://huggingface.co/vinid/plip"
     logical_path: "reference/person_d/checkpoint/plip"
+    # The whole repository snapshot: from_pretrained reads all six files.
     required_files_sha256:
       pytorch_model.bin: "98a7f8d2a1f4a8fc8f6dedb3a16ff7efbe02a7ef67c93904c80bca9767c69630"
+      config.json: "79595b5c6be8867e3ba42c34b1e6b9a0f957e549c1e7f43b5c6945f4f6f59471"
+      preprocessor_config.json: "910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd"
+      special_tokens_map.json: "f8c0d6c39aee3f8431078ef6646567b0aba7f2246e9c54b8b99d55c22b707cbf"
+      tokenizer.json: "b556ac8c99757ffb677208af34bc8c6721572114111a6e0aaf5fa69ff0b8d842"
+      tokenizer_config.json: "cbcdcf14cede6b5c3a6841f37961364357d82bef3079beb115e95f27252526a0"
     size_bytes: 605241933
     license_or_access_policy: "Not declared on the Hugging Face model card; confirm before use or redistribution"
     contains_phi: false
-    configured_by: "configs/native.example.json:extraction.plip.weight_path"
+    configured_by: "configs/native.example.json:extraction.plip (weight_path, sha256, support_files_sha256)"
 
   - asset_id: conch-vit-b-16
     type: model_weight
@@ -72,15 +80,20 @@ assets:
   - asset_id: person-d-roi-analysis-examples
     type: template
     required: true
-    version: "1.0.0"
+    # 1.0.0 (tree 5a4ba948...) had Architecture/Specific_Sub_Architectures/breastmalignanttubularJornsmicro07.jpg
+    # outside an option folder, where the prototype loader ignored it; 1.0.1 files the same image as
+    # Architecture/Specific_Sub_Architectures/Rigid bridges/04.jpg. No other file changed.
+    version: "1.0.1"
     # Origin and de-identification as stated by the asset owner (person_D).
     source: "WHO Classification of Tumours, Breast Tumours, 5th edition, Volume 2 (IARC, 2019), illustrations of usual ductal hyperplasia, flat epithelial atypia, atypical ductal hyperplasia, ductal carcinoma in situ and invasive carcinoma; https://publications.iarc.who.int/Book-And-Report-Series/Who-Classification-Of-Tumours/Breast-Tumours-2019"
     logical_path: "reference/person_d/template_ref/Example/ROI_Analysis"
     file_count: 440
+    # Files the prototype loader reads; a file outside <group>/<attribute>/<option>/ fails the run.
+    loader_usable_file_count: 440
     size_bytes: 514721813
     verification:
       tree_hash_algorithm: "sha256 of '\\n'-joined '<file-sha256>  <relative-posix-path>' lines sorted by case-sensitive path"
-      tree_sha256: "5a4ba948b955a1762700b8881eff12614b9120c47f6d44c7e8d2be201b7f75ce"
+      tree_sha256: "188b5fe0698cb2e5cbe48c24d2e4cc0923864dd76adb5d10cfe71fc81e32cbce"
     license_or_access_policy: "Copyrighted IARC/WHO publication; shared only in the project's restricted reference-asset folder for internal research and testing; must not be passed on, committed, or included in the image"
     contains_phi: false
     configured_by: "configs/native.example.json:extraction.example_dir"

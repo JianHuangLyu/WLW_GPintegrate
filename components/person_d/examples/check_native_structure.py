@@ -41,10 +41,14 @@ def expected_outcome(rule: dict, event: dict, matching: dict) -> tuple[float, tu
 
     must_false_failed = any("Must_False" in result["conditions"] for result in evaluated)
     must_true_failed = any(
-        result["requires_must_true"] and "Must_True" not in result["conditions"] for result in evaluated
+        result["requires_must_true"]
+        and "Must_True" not in result["conditions"]
+        and "Must_True" not in result.get("unreachable_must", {})
+        for result in evaluated
     )
     unverified = any(
-        result["requires_must_true"] and result["status"] != "evaluated" for result in attributes
+        (result["requires_must_true"] and result["status"] != "evaluated") or "unreachable_must" in result
+        for result in attributes
     )
     reject_unverified = rule["unverified_must_true"] == "reject" and unverified
 

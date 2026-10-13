@@ -136,6 +136,26 @@ def _stain_ids(case: dict[str, Any]) -> list[str]:
     return [stain["stain_id"] for block in case["tissue_blocks"] for stain in block["stains"]]
 
 
+def _check_criteria(query: dict[str, Any]) -> None:
+    """Reject a mapped query whose diagnosticCriteria cannot be matched."""
+
+    criteria = query.get("diagnosticCriteria")
+    if query["criteria_status"] != "mapped" or not criteria:
+        return
+    query_id = query["query_id"]
+    if not isinstance(criteria.get("version"), str) or not criteria["version"]:
+        raise ValueError(f"Query {query_id} diagnosticCriteria is missing 'version'")
+    visual_attrs = criteria.get("visualAttrs")
+    if not isinstance(visual_attrs, dict):
+        raise ValueError(f"Query {query_id} diagnosticCriteria is missing 'visualAttrs'")
+    for category, attributes in visual_attrs.items():
+        for attribute, spec in attributes.items():
+            if not isinstance(spec.get("options"), list) or not isinstance(spec.get("conditions"), dict):
+                raise ValueError(
+                    f"Query {query_id} diagnosticCriteria {category}.{attribute} needs 'options' and 'conditions'"
+                )
+
+
 def _check_linkage(e_case: dict[str, Any], g_case: dict[str, Any]) -> None:
     e_stains = _stain_ids(e_case)
     if set(e_stains) != set(_stain_ids(g_case)):
@@ -162,6 +182,7 @@ def _check_linkage(e_case: dict[str, Any], g_case: dict[str, Any]) -> None:
                     f"Query {query['query_id']} dx_pair_id does not match {DxItem}"
                 )
             query_ids.append(query["query_id"])
+            _check_criteria(query)
     if len(query_ids) != len(set(query_ids)):
         raise ValueError("G contains duplicate query_id values")
 
@@ -169,8 +190,9 @@ def _check_linkage(e_case: dict[str, Any], g_case: dict[str, Any]) -> None:
 def validate_inputs(e_artifact: dict[str, Any], g_artifact: dict[str, Any]) -> str:
     """Input boundary shared by example and native mode; returns the case_id.
 
-    Checks case identity, data_mode, stain / pair / query linkage and the metadata
-    geometry of every ROI, so both modes accept or reject the same E/G pair.
+    Checks case identity, data_mode, stain / pair / query linkage, the shape of every
+    mapped diagnosticCriteria and the metadata geometry of every ROI, so both modes
+    accept or reject the same E/G pair.
     """
 
     case_id = ensure_same_case(e_artifact, g_artifact)
@@ -210,8 +232,12 @@ def build_native_artifact(
     extractor_factory: Callable[[], Any],
     image_reader: Any,
     extraction_info: dict[str, Any],
+    vocabulary: dict[str, dict[str, list[str]]],
 ) -> dict[str, Any]:
-    """Build H; models load only when at least one ROI needs extraction."""
+    """Build H; models load only when at least one ROI needs extraction.
+
+    ``vocabulary`` is the extraction vocabulary (category -> attribute -> labels).
+    """
 
     case_id = validate_inputs(e_artifact, g_artifact)
     producer = _native_producer(config)
@@ -271,6 +297,7 @@ def build_native_artifact(
                             query["diagnosticCriteria"],
                             label_map,
                             settings,
+                            vocabulary,
                         )
                         details: dict[str, Any] = {"backend": NATIVE_BACKEND}
                         if result["status"] != "skipped":
@@ -288,7 +315,13 @@ def build_native_artifact(
                         )
                         matching[query["query_id"]] = {
                             key: result[key]
-                            for key in ("status", "evaluated_count", "must_true_unverified", "attributes")
+                            for key in (
+                                "status",
+                                "evaluated_count",
+                                "must_true_unverified",
+                                "must_unverifiable",
+                                "attributes",
+                            )
                         }
                     roi["visualAttrs"] = extraction["consistent"]
                     roi["visualAttrs_info"] = {
@@ -313,6 +346,11 @@ def build_native_artifact(
             **(
                 {"example_prototypes": extractor.example_metadata()}
                 if extractor is not None
+                else {}
+            ),
+            **(
+                {"example_tree": dict(extractor.example_tree)}
+                if getattr(extractor, "example_tree", None)
                 else {}
             ),
         },
@@ -356,6 +394,7 @@ def _run_native(
     from components.person_d.visual_attribute_extraction import (
         extraction_provenance,
         load_extractor,
+        load_prompt_document,
     )
 
     device = config["device"]
@@ -370,6 +409,7 @@ def _run_native(
             extractor_factory=lambda: load_extractor(extraction_config, device),
             image_reader=reader,
             extraction_info=extraction_provenance(extraction_config, device),
+            vocabulary=load_prompt_document(extraction_config)[1]["attributes"],
         )
 
 

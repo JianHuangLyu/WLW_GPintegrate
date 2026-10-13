@@ -6,11 +6,18 @@
     "prompts_path": "../reference/person_d/template_ref/visual_attribute_prompts.json",
     "prompts_sha256": "e61b7d784aa8959305c22db7eb71921d5487ab479ebbaa16abb3c3ca957099d4",
     "example_dir": "../reference/person_d/template_ref/Example/ROI_Analysis",
-    "example_tree_sha256": "5a4ba948b955a1762700b8881eff12614b9120c47f6d44c7e8d2be201b7f75ce",
+    "example_tree_sha256": "188b5fe0698cb2e5cbe48c24d2e4cc0923864dd76adb5d10cfe71fc81e32cbce",
     "plip": {
       "weight_path": "../reference/person_d/checkpoint/plip",
       "revision": "67ade53ddd32195868f422585f72698ef5d15094",
-      "sha256": "98a7f8d2a1f4a8fc8f6dedb3a16ff7efbe02a7ef67c93904c80bca9767c69630"
+      "sha256": "98a7f8d2a1f4a8fc8f6dedb3a16ff7efbe02a7ef67c93904c80bca9767c69630",
+      "support_files_sha256": {
+        "config.json": "79595b5c6be8867e3ba42c34b1e6b9a0f957e549c1e7f43b5c6945f4f6f59471",
+        "preprocessor_config.json": "910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd",
+        "special_tokens_map.json": "f8c0d6c39aee3f8431078ef6646567b0aba7f2246e9c54b8b99d55c22b707cbf",
+        "tokenizer.json": "b556ac8c99757ffb677208af34bc8c6721572114111a6e0aaf5fa69ff0b8d842",
+        "tokenizer_config.json": "cbcdcf14cede6b5c3a6841f37961364357d82bef3079beb115e95f27252526a0"
+      }
     },
     "conch": {
       "model_name": "conch_ViT-B-16",

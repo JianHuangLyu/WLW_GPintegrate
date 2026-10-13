@@ -13,6 +13,7 @@
 | `H_matches.empty.expected.json` | `native` 模式、空 ROI case 的完整預期輸出；不載入模型（逐內容比對） |
 | `H_matches.native.structure.json` | `native` 模式、完整 case 的預期結構 |
 | `check_native_structure.py` | 依結構檔檢查 `native` 輸出 |
+| `person_c_integration/` | 以丙（#1）的 E 執行丁 native 所需的 fixture 產生程式與規格 |
 
 ## 涵蓋情境
 
@@ -20,7 +21,7 @@
 |---|---|---|
 | selected | 兩個 HE ROI 的 `query-004` | 固定 `selected`／`visual_attributes_match` |
 | rejected | 兩個 HE ROI 的 `query-005` | 固定 `rejected`／`score_below_threshold` |
-| 真實 criteria | 兩個 HE ROI 的 `query-001`、`query-002` | 由模型決定，須符合 `score_rule`；Must_True 屬性未取得兩模型共識時不會 `selected`（實測：he-roi-001 為 `skipped`／`insufficient_visual_evidence`，he-roi-002 為 `rejected`／`must_condition_failed`） |
+| 真實 criteria（無法驗證的 Must 條件） | 兩個 HE ROI 的 `query-001`、`query-002` | 不可能 `selected`：`skipped`／`insufficient_visual_evidence` 或 `rejected`／`must_condition_failed`（實測：he-roi-001 為前者，he-roi-002 為後者） |
 | 非 reference WSI（skipped） | `case-001-er` 的所有 ROI × 所有 query | 固定 `skipped`／`stain_not_in_reference_wsi`，每個 query 一筆並帶 `query_id` |
 | unmapped query（skipped） | `case-001-query-003` | 固定 `skipped`／`query_unmapped` |
 | 空 ROI case | `E_rois.empty.valid.json` | 逐內容比對 |
@@ -28,10 +29,11 @@
 `query-004`、`query-005` 的 criteria 由 `query-001` 衍生：每個屬性的選項分別全設為 High_Possibly_True
 或 Low_Possibly_True（`Unable to confirm` 設為 Not_Mentioned），沒有任何 Must_True／Must_False。只要兩個
 模型在至少一個屬性上達成共識（`min_evaluated_attributes` = 1），score 就分別是 1 與 -1，結果與模型
-預測的是哪個標籤無關；實測每個 HE ROI 有 5–6 個共識屬性。`query-001`、`query-002` 的真實 criteria 在
-`Tumour_Border`、`Myoepithelial_Cell_Layer`、`Stromal_Characteristics` 有 Must_True；這些屬性只有在兩個
-模型達成共識時才算驗證，否則該 query 不會 `selected`。各分支以假模型做的確定性覆蓋另見
-`components/person_d/tests/`。
+預測的是哪個標籤無關；實測每個 HE ROI 有 5–6 個共識屬性。`query-001`、`query-002` 的真實 criteria
+（Invasive Carcinoma）有 4 個 Must_False 選項是 vocabulary 無法預測的（`Pattern` 的
+`Absent, No special pattern`、`Simple Tubular/Branching Structures`，`Epithelial_Cell_Shape` 的 `Bilayered`，
+`Endoluminal_Secretion` 的 `Physiological`；見 `components/person_d/MAPPING.md`），這些 Must 條件無法驗證，
+因此這兩個 query 不會 `selected`。各分支以假模型做的確定性覆蓋另見 `components/person_d/tests/`。
 
 ## 來源與去識別化
 
@@ -105,7 +107,8 @@ python components/person_d/examples/check_native_structure.py \
   `visualAttrs_info.matching.<query_id>` 的逐屬性判定重算 score，與 event `score` 差距須 ≤
   `score_tolerance`（1e-6，score 取到小數 6 位）；status／reason 依序須符合：evaluated 屬性數 <
   `min_evaluated_attributes` → `skipped`／`insufficient_visual_evidence`；Must_False 命中或已評估的
-  Must_True 未滿足 → `rejected`／`must_condition_failed`；有未驗證的 Must_True → `skipped`／
-  `insufficient_visual_evidence`；score < `score_threshold` → `rejected`／`score_below_threshold`；其餘 →
+  Must_True 未滿足 → `rejected`／`must_condition_failed`；有未驗證的 Must 條件（Must_True 屬性未被評估，
+  或 Must_True／Must_False 落在 vocabulary 無法預測的選項）→ `skipped`／`insufficient_visual_evidence`；
+  score < `score_threshold` → `rejected`／`score_below_threshold`；其餘 →
   `selected`／`visual_attributes_match`。各選項的模型相似度分數不比對；同一張 GPU 上 Windows 與 Linux
   容器的實測差距 ≤ 1e-6。

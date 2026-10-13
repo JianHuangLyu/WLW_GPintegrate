@@ -5,12 +5,13 @@ Compares the PLIP/CONCH-consistent labels of one ROI with one G
 
 An attribute is evaluated only when both models agree, its labels map to
 criteria options, and at least one mapped condition is informative.  A
-Must_False option or a missed Must_True option rejects the ROI.  A Must_True
-attribute that was not evaluated is unverified: it never counts as passed, so
-the ROI is skipped (or rejected under the ``reject`` policy) instead of being
-scored.  Otherwise the mean condition weight must reach the configured
-threshold.  Too few evaluated attributes is insufficient evidence and yields
-skipped.
+Must_False option or a missed Must_True option rejects the ROI.  A Must
+condition is unverified when its attribute was not evaluated (Must_True) or
+when it sits on a criteria option no vocabulary label can reach (Must_True or
+Must_False): it never counts as passed, so the ROI is skipped (or rejected
+under the ``reject`` policy) instead of being scored.  Otherwise the mean
+condition weight must reach the configured threshold.  Too few evaluated
+attributes is insufficient evidence and yields skipped.
 """
 
 from __future__ import annotations
@@ -152,8 +153,13 @@ def match_query(
     criteria: Mapping[str, Any],
     label_map: LabelMap,
     settings: MatchingSettings,
+    vocabulary: Mapping[str, Mapping[str, list[str]]],
 ) -> dict[str, Any]:
-    """Match one ROI's consistent labels against one diagnosticCriteria."""
+    """Match one ROI's consistent labels against one diagnosticCriteria.
+
+    ``vocabulary`` is the extraction vocabulary (category -> attribute -> labels); it decides
+    which criteria options the backend can reach at all.
+    """
 
     if criteria["version"] != label_map.criteria_version:
         raise ValueError(
@@ -171,22 +177,43 @@ def match_query(
             else:
                 result = evaluate_attribute(labels, attr_spec, key, label_map)
             result["requires_must_true"] = "Must_True" in attr_spec["conditions"].values()
+            options = list(attr_spec["options"])
+            reachable = {
+                option
+                for label in vocabulary.get(category, {}).get(attribute, [])
+                for option in label_map.resolve(key, label, options)
+            }
+            unreachable_must = {
+                condition: [
+                    option
+                    for option in options
+                    if attr_spec["conditions"].get(option) == condition and option not in reachable
+                ]
+                for condition in ("Must_True", "Must_False")
+            }
+            unreachable_must = {condition: found for condition, found in unreachable_must.items() if found}
+            if unreachable_must:
+                result["unreachable_must"] = unreachable_must
             attributes[key] = result
 
     evaluated = {key: result for key, result in attributes.items() if result["status"] == "evaluated"}
     must_false_failed = sorted(
         key for key, result in evaluated.items() if "Must_False" in result["conditions"]
     )
+    # A miss only counts when every Must_True option of the attribute could have been predicted.
     must_true_failed = sorted(
         key
         for key, result in evaluated.items()
-        if result["requires_must_true"] and "Must_True" not in result["conditions"]
+        if result["requires_must_true"]
+        and "Must_True" not in result["conditions"]
+        and "Must_True" not in result.get("unreachable_must", {})
     )
     must_true_unverified = sorted(
         key
         for key, result in attributes.items()
         if result["requires_must_true"] and key not in evaluated
     )
+    must_unverifiable = sorted(key for key, result in attributes.items() if "unreachable_must" in result)
 
     attribute_scores = []
     for result in evaluated.values():
@@ -198,13 +225,20 @@ def match_query(
         attribute_scores.append(sum(weights) / len(weights))
     score = round(sum(attribute_scores) / len(attribute_scores), 6) if attribute_scores else 0.0
 
-    reject_unverified = settings.unverified_must_true == "reject" and bool(must_true_unverified)
-    must_false_passed = not must_false_failed
-    must_true_passed = not must_true_failed and not must_true_unverified
+    unverified = sorted(set(must_true_unverified) | set(must_unverifiable))
+    reject_unverified = settings.unverified_must_true == "reject" and bool(unverified)
+    must_false_passed = not must_false_failed and not any(
+        "Must_False" in attributes[key]["unreachable_must"] for key in must_unverifiable
+    )
+    must_true_passed = (
+        not must_true_failed
+        and not must_true_unverified
+        and not any("Must_True" in attributes[key]["unreachable_must"] for key in must_unverifiable)
+    )
     failed = sorted(
         set(must_false_failed)
         | set(must_true_failed)
-        | (set(must_true_unverified) if reject_unverified else set())
+        | (set(unverified) if reject_unverified else set())
     )
     matched = sorted(
         key
@@ -212,13 +246,13 @@ def match_query(
         if SUPPORTING_CONDITIONS & set(result["conditions"])
     )
 
-    # An unverified Must_True could still add to the score, so it is checked
-    # before the threshold and never ends as selected.
+    # An unverified Must condition could still change the outcome, so it is
+    # checked before the threshold and never ends as selected.
     if len(evaluated) < settings.min_evaluated_attributes:
         status, reason = "skipped", "insufficient_visual_evidence"
     elif must_false_failed or must_true_failed or reject_unverified:
         status, reason = "rejected", "must_condition_failed"
-    elif must_true_unverified:
+    elif unverified:
         status, reason = "skipped", "insufficient_visual_evidence"
     elif score < settings.score_threshold:
         status, reason = "rejected", "score_below_threshold"
@@ -235,5 +269,6 @@ def match_query(
         "failed_attributes": failed,
         "evaluated_count": len(evaluated),
         "must_true_unverified": must_true_unverified,
+        "must_unverifiable": must_unverifiable,
         "attributes": attributes,
     }

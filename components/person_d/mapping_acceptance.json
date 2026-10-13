@@ -1,0 +1,1266 @@
+{
+  "criteria_version": "1.2.1",
+  "prompt_asset": {
+    "version": "1.1.0",
+    "sha256": "e61b7d784aa8959305c22db7eb71921d5487ab479ebbaa16abb3c3ca957099d4"
+  },
+  "label_map": {
+    "version": "1.0.0",
+    "sha256": "e1f59e667358fbca6f6bfe70cbfc140cd6c0a4ed8f6661920b5562a042f46e38",
+    "global_aliases": {
+      "N/A": [
+        "Unable to confirm"
+      ]
+    },
+    "attribute_aliases": {
+      "Architecture.Pattern": {
+        "Single file": [
+          "Single-file/Linear cords"
+        ]
+      },
+      "Cellular_and_Nuclear.Epithelial_Cell_Shape": {
+        "Cuboidal/Columnar": [
+          "Cuboidal",
+          "Columnar"
+        ]
+      },
+      "Special_Features.Endoluminal_Secretion": {
+        "Present": [
+          "Present, Not Otherwise Specified"
+        ]
+      }
+    }
+  },
+  "unreachable_categories": {
+    "unable_to_confirm": "Not a prediction target. The attribute has no N/A label; the backend expresses that it cannot assess an attribute through model disagreement, which leaves the attribute unevaluated.",
+    "generic_not_otherwise_specified": "Not a prediction target. The vocabulary always assigns a specific type or Absent, never the generic 'present, type not specified' category.",
+    "filed_under_another_attribute": "Not covered for this attribute. The vocabulary carries the same concept under a different attribute than criteria 1.2.1.",
+    "not_covered": "Not covered. The vocabulary of pipeline_quilt_1m.py predates criteria 1.2.1 and has no label for this option; the backend can never predict it."
+  },
+  "summary": {
+    "attributes": 24,
+    "prompt_options": 105,
+    "criteria_options": 138,
+    "unmapped_prompt_options": 1,
+    "multi_mapped_prompt_options": 1,
+    "unreachable_criteria_options": 33,
+    "unreachable_by_category": {
+      "filed_under_another_attribute": 1,
+      "generic_not_otherwise_specified": 2,
+      "not_covered": 16,
+      "unable_to_confirm": 14
+    }
+  },
+  "attributes": {
+    "Cellular_and_Nuclear.Cell_Pleomorphism": {
+      "prompt_options": [
+        "Monomorphic",
+        "Mild",
+        "Moderate",
+        "Severe"
+      ],
+      "criteria_options": [
+        "Monomorphic",
+        "Mild",
+        "Moderate",
+        "Severe",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Monomorphic": {
+          "options": [
+            "Monomorphic"
+          ],
+          "rule": "exact"
+        },
+        "Mild": {
+          "options": [
+            "Mild"
+          ],
+          "rule": "exact"
+        },
+        "Moderate": {
+          "options": [
+            "Moderate"
+          ],
+          "rule": "exact"
+        },
+        "Severe": {
+          "options": [
+            "Severe"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Cytological_Atypia": {
+      "prompt_options": [
+        "Absent",
+        "Low-grade/Mild",
+        "Intermediate-grade/Moderate",
+        "High-grade/Severe"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Low-grade/Mild",
+        "Intermediate-grade/Moderate",
+        "High-grade/Severe",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Low-grade/Mild": {
+          "options": [
+            "Low-grade/Mild"
+          ],
+          "rule": "exact"
+        },
+        "Intermediate-grade/Moderate": {
+          "options": [
+            "Intermediate-grade/Moderate"
+          ],
+          "rule": "exact"
+        },
+        "High-grade/Severe": {
+          "options": [
+            "High-grade/Severe"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Chromatin": {
+      "prompt_options": [
+        "Regular",
+        "Vesicular",
+        "Coarsely clumped",
+        "Hyperchromatic"
+      ],
+      "criteria_options": [
+        "Regular",
+        "Vesicular",
+        "Coarsely clumped",
+        "Hyperchromatic",
+        "Salt-and-pepper",
+        "Smudged",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Regular": {
+          "options": [
+            "Regular"
+          ],
+          "rule": "exact"
+        },
+        "Vesicular": {
+          "options": [
+            "Vesicular"
+          ],
+          "rule": "exact"
+        },
+        "Coarsely clumped": {
+          "options": [
+            "Coarsely clumped"
+          ],
+          "rule": "exact"
+        },
+        "Hyperchromatic": {
+          "options": [
+            "Hyperchromatic"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Salt-and-pepper": {
+          "category": "not_covered"
+        },
+        "Smudged": {
+          "category": "not_covered"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Nuclear_Size": {
+      "prompt_options": [
+        "Uniform",
+        "Variable"
+      ],
+      "criteria_options": [
+        "Uniform",
+        "Enlargement",
+        "Variable",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Uniform": {
+          "options": [
+            "Uniform"
+          ],
+          "rule": "exact"
+        },
+        "Variable": {
+          "options": [
+            "Variable"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Enlargement": {
+          "category": "not_covered"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Nuclear_Shape": {
+      "prompt_options": [
+        "Uniform",
+        "Spindle",
+        "Irregular/Pleomorphic"
+      ],
+      "criteria_options": [
+        "Uniform",
+        "Spindle",
+        "Irregular/Pleomorphic",
+        "Vesicular",
+        "Variable",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Uniform": {
+          "options": [
+            "Uniform"
+          ],
+          "rule": "exact"
+        },
+        "Spindle": {
+          "options": [
+            "Spindle"
+          ],
+          "rule": "exact"
+        },
+        "Irregular/Pleomorphic": {
+          "options": [
+            "Irregular/Pleomorphic"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Vesicular": {
+          "category": "not_covered"
+        },
+        "Variable": {
+          "category": "not_covered"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Prominent_Nucleoli": {
+      "prompt_options": [
+        "Absent",
+        "Present"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Present",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Present": {
+          "options": [
+            "Present"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Epithelial_Cell_Shape": {
+      "prompt_options": [
+        "Cuboidal/Columnar",
+        "Squamous",
+        "Polygonal",
+        "Plasmacytoid",
+        "Spindle"
+      ],
+      "criteria_options": [
+        "Bilayered",
+        "Cuboidal",
+        "Columnar",
+        "Squamous",
+        "Polygonal",
+        "Plasmacytoid",
+        "Spindle",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Cuboidal/Columnar": {
+          "options": [
+            "Cuboidal",
+            "Columnar"
+          ],
+          "rule": "attribute_alias"
+        },
+        "Squamous": {
+          "options": [
+            "Squamous"
+          ],
+          "rule": "exact"
+        },
+        "Polygonal": {
+          "options": [
+            "Polygonal"
+          ],
+          "rule": "exact"
+        },
+        "Plasmacytoid": {
+          "options": [
+            "Plasmacytoid"
+          ],
+          "rule": "exact"
+        },
+        "Spindle": {
+          "options": [
+            "Spindle"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Bilayered": {
+          "category": "not_covered"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      },
+      "prompt_option_notes": {
+        "Cuboidal/Columnar": "Maps to both 'Cuboidal' and 'Columnar'. When the two options carry different conditions in a criteria the label is ambiguous and dropped; when they carry the same condition it counts once with that condition."
+      }
+    },
+    "Cellular_and_Nuclear.Polarity": {
+      "prompt_options": [
+        "Maintained",
+        "Partially lost",
+        "Completely lost"
+      ],
+      "criteria_options": [
+        "Maintained",
+        "Partially lost",
+        "Completely lost",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Maintained": {
+          "options": [
+            "Maintained"
+          ],
+          "rule": "exact"
+        },
+        "Partially lost": {
+          "options": [
+            "Partially lost"
+          ],
+          "rule": "exact"
+        },
+        "Completely lost": {
+          "options": [
+            "Completely lost"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Cellular_and_Nuclear.Cytoplasmic_Features": {
+      "prompt_options": [
+        "Amphophilic to Pale Eosinophilic",
+        "Eosinophilic/Granular",
+        "Clear/Glycogenated",
+        "Vacuolated/Foamy/Lipid-rich",
+        "Signet-ring",
+        "Hobnail",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Amphophilic to Pale Eosinophilic",
+        "Eosinophilic/Granular",
+        "Clear/Glycogenated",
+        "Vacuolated/Foamy/Lipid-rich",
+        "Signet-ring",
+        "Hobnail",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Amphophilic to Pale Eosinophilic": {
+          "options": [
+            "Amphophilic to Pale Eosinophilic"
+          ],
+          "rule": "exact"
+        },
+        "Eosinophilic/Granular": {
+          "options": [
+            "Eosinophilic/Granular"
+          ],
+          "rule": "exact"
+        },
+        "Clear/Glycogenated": {
+          "options": [
+            "Clear/Glycogenated"
+          ],
+          "rule": "exact"
+        },
+        "Vacuolated/Foamy/Lipid-rich": {
+          "options": [
+            "Vacuolated/Foamy/Lipid-rich"
+          ],
+          "rule": "exact"
+        },
+        "Signet-ring": {
+          "options": [
+            "Signet-ring"
+          ],
+          "rule": "exact"
+        },
+        "Hobnail": {
+          "options": [
+            "Hobnail"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Cellular_and_Nuclear.Mitotic_Activity": {
+      "prompt_options": [
+        "Inconspicuous",
+        "Present/Brisk",
+        "Atypical figures present",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Inconspicuous",
+        "Present/Brisk",
+        "Atypical figures present",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Inconspicuous": {
+          "options": [
+            "Inconspicuous"
+          ],
+          "rule": "exact"
+        },
+        "Present/Brisk": {
+          "options": [
+            "Present/Brisk"
+          ],
+          "rule": "exact"
+        },
+        "Atypical figures present": {
+          "options": [
+            "Atypical figures present"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Architecture.Pattern": {
+      "prompt_options": [
+        "N/A",
+        "Comedo",
+        "Solid",
+        "Cribriform",
+        "Papillary",
+        "Trabecular/Cords",
+        "Single file",
+        "one to several layers",
+        "fenestrated",
+        "micropapillary"
+      ],
+      "criteria_options": [
+        "Absent, No special pattern",
+        "Simple Tubular/Branching Structures",
+        "Solid",
+        "Comedo",
+        "Cribriform",
+        "Papillary",
+        "Trabecular/Cords",
+        "Micropapillary",
+        "Single-file/Linear cords",
+        "Fenestrated",
+        "Tubular/Glandular",
+        "Cystic/Microcystic",
+        "Syncytial",
+        "Nests/Morules",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        },
+        "Comedo": {
+          "options": [
+            "Comedo"
+          ],
+          "rule": "exact"
+        },
+        "Solid": {
+          "options": [
+            "Solid"
+          ],
+          "rule": "exact"
+        },
+        "Cribriform": {
+          "options": [
+            "Cribriform"
+          ],
+          "rule": "exact"
+        },
+        "Papillary": {
+          "options": [
+            "Papillary"
+          ],
+          "rule": "exact"
+        },
+        "Trabecular/Cords": {
+          "options": [
+            "Trabecular/Cords"
+          ],
+          "rule": "exact"
+        },
+        "Single file": {
+          "options": [
+            "Single-file/Linear cords"
+          ],
+          "rule": "attribute_alias"
+        },
+        "one to several layers": {
+          "options": [],
+          "rule": "unmapped"
+        },
+        "fenestrated": {
+          "options": [
+            "Fenestrated"
+          ],
+          "rule": "case_insensitive"
+        },
+        "micropapillary": {
+          "options": [
+            "Micropapillary"
+          ],
+          "rule": "case_insensitive"
+        }
+      },
+      "unreachable": {
+        "Absent, No special pattern": {
+          "category": "not_covered"
+        },
+        "Simple Tubular/Branching Structures": {
+          "category": "not_covered"
+        },
+        "Tubular/Glandular": {
+          "category": "not_covered"
+        },
+        "Cystic/Microcystic": {
+          "category": "not_covered"
+        },
+        "Syncytial": {
+          "category": "not_covered"
+        },
+        "Nests/Morules": {
+          "category": "not_covered"
+        }
+      },
+      "prompt_option_notes": {
+        "one to several layers": "Unmapped: criteria 1.2.1 lists 'One to several layers' under Specific_Sub_Architectures, not under Pattern. The label is dropped; when it is the only agreed label the attribute is not evaluated."
+      }
+    },
+    "Architecture.Specific_Sub_Architectures": {
+      "prompt_options": [
+        "N/A",
+        "Rigid bridges",
+        "Arches",
+        "Bulbous",
+        "thin/stretched bridge",
+        "bars",
+        "microrosettes"
+      ],
+      "criteria_options": [
+        "Absent, No special pattern",
+        "Rigid bridges",
+        "Arches",
+        "Bulbous",
+        "Thin/Stretched bridge",
+        "Bars",
+        "Microrosettes",
+        "One to several layers",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        },
+        "Rigid bridges": {
+          "options": [
+            "Rigid bridges"
+          ],
+          "rule": "exact"
+        },
+        "Arches": {
+          "options": [
+            "Arches"
+          ],
+          "rule": "exact"
+        },
+        "Bulbous": {
+          "options": [
+            "Bulbous"
+          ],
+          "rule": "exact"
+        },
+        "thin/stretched bridge": {
+          "options": [
+            "Thin/Stretched bridge"
+          ],
+          "rule": "case_insensitive"
+        },
+        "bars": {
+          "options": [
+            "Bars"
+          ],
+          "rule": "case_insensitive"
+        },
+        "microrosettes": {
+          "options": [
+            "Microrosettes"
+          ],
+          "rule": "case_insensitive"
+        }
+      },
+      "unreachable": {
+        "Absent, No special pattern": {
+          "category": "not_covered"
+        },
+        "One to several layers": {
+          "category": "filed_under_another_attribute",
+          "note": "The vocabulary files this label under Architecture.Pattern ('one to several layers'), where criteria 1.2.1 has no such option."
+        }
+      }
+    },
+    "Architecture.Architectural_Atypia": {
+      "prompt_options": [
+        "Absent",
+        "Mild/Moderate",
+        "Severe"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Mild/Moderate",
+        "Severe",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Mild/Moderate": {
+          "options": [
+            "Mild/Moderate"
+          ],
+          "rule": "exact"
+        },
+        "Severe": {
+          "options": [
+            "Severe"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Architecture.Lumina_Shape": {
+      "prompt_options": [
+        "Round/Oval",
+        "Slit-like/Compressed",
+        "Irregular/Angulated",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Round/Oval",
+        "Slit-like/Compressed",
+        "Irregular/Angulated",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Round/Oval": {
+          "options": [
+            "Round/Oval"
+          ],
+          "rule": "exact"
+        },
+        "Slit-like/Compressed": {
+          "options": [
+            "Slit-like/Compressed"
+          ],
+          "rule": "exact"
+        },
+        "Irregular/Angulated": {
+          "options": [
+            "Irregular/Angulated"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Architecture.Tumour_Border": {
+      "prompt_options": [
+        "Absent, No tumour",
+        "Well-circumscribed/Pushing",
+        "Irregular/Infiltrative",
+        "Pseudoinfiltrative",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Absent, No tumour",
+        "Well-circumscribed/Pushing",
+        "Irregular/Infiltrative",
+        "Pseudoinfiltrative",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent, No tumour": {
+          "options": [
+            "Absent, No tumour"
+          ],
+          "rule": "exact"
+        },
+        "Well-circumscribed/Pushing": {
+          "options": [
+            "Well-circumscribed/Pushing"
+          ],
+          "rule": "exact"
+        },
+        "Irregular/Infiltrative": {
+          "options": [
+            "Irregular/Infiltrative"
+          ],
+          "rule": "exact"
+        },
+        "Pseudoinfiltrative": {
+          "options": [
+            "Pseudoinfiltrative"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Architecture.Myoepithelial_Cell_Layer": {
+      "prompt_options": [
+        "Visibly Intact/Prominent",
+        "Attenuated/Indiscernible",
+        "Visibly Absent",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Visibly Intact/Prominent",
+        "Attenuated/Indiscernible",
+        "Visibly Absent",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Visibly Intact/Prominent": {
+          "options": [
+            "Visibly Intact/Prominent"
+          ],
+          "rule": "exact"
+        },
+        "Attenuated/Indiscernible": {
+          "options": [
+            "Attenuated/Indiscernible"
+          ],
+          "rule": "exact"
+        },
+        "Visibly Absent": {
+          "options": [
+            "Visibly Absent"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Special_Features.Apocrine_Differentiation": {
+      "prompt_options": [
+        "Absent",
+        "Present"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Present",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Present": {
+          "options": [
+            "Present"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Special_Features.Apical_Snout": {
+      "prompt_options": [
+        "Absent",
+        "Present"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Present",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Present": {
+          "options": [
+            "Present"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Special_Features.Endoluminal_Secretion": {
+      "prompt_options": [
+        "Absent",
+        "Present",
+        "Eosinophilic/Proteinaceous",
+        "Mucinous",
+        "Cellular debris"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Physiological",
+        "Eosinophilic/Proteinaceous",
+        "Mucinous",
+        "Cellular debris",
+        "Mucin pools/Extracellular mucin",
+        "Present, Not Otherwise Specified",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Present": {
+          "options": [
+            "Present, Not Otherwise Specified"
+          ],
+          "rule": "attribute_alias"
+        },
+        "Eosinophilic/Proteinaceous": {
+          "options": [
+            "Eosinophilic/Proteinaceous"
+          ],
+          "rule": "exact"
+        },
+        "Mucinous": {
+          "options": [
+            "Mucinous"
+          ],
+          "rule": "exact"
+        },
+        "Cellular debris": {
+          "options": [
+            "Cellular debris"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Physiological": {
+          "category": "not_covered"
+        },
+        "Mucin pools/Extracellular mucin": {
+          "category": "not_covered"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Special_Features.Necrosis": {
+      "prompt_options": [
+        "Absent",
+        "Focal/Punctate",
+        "Comedonecrosis"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Focal/Punctate",
+        "Comedonecrosis",
+        "Present, Not Otherwise Specified",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Focal/Punctate": {
+          "options": [
+            "Focal/Punctate"
+          ],
+          "rule": "exact"
+        },
+        "Comedonecrosis": {
+          "options": [
+            "Comedonecrosis"
+          ],
+          "rule": "exact"
+        }
+      },
+      "unreachable": {
+        "Present, Not Otherwise Specified": {
+          "category": "generic_not_otherwise_specified"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Special_Features.Calcifications": {
+      "prompt_options": [
+        "Absent",
+        "Psammomatous",
+        "Fine pleomorphic/Clustered",
+        "microcalcifications",
+        "amorphous",
+        "linear",
+        "branching"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Coarse/Popcorn",
+        "Psammomatous",
+        "Microcalcifications",
+        "Linear",
+        "Branching",
+        "Fine pleomorphic/Clustered",
+        "Amorphous",
+        "Present, Not Otherwise Specified",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Psammomatous": {
+          "options": [
+            "Psammomatous"
+          ],
+          "rule": "exact"
+        },
+        "Fine pleomorphic/Clustered": {
+          "options": [
+            "Fine pleomorphic/Clustered"
+          ],
+          "rule": "exact"
+        },
+        "microcalcifications": {
+          "options": [
+            "Microcalcifications"
+          ],
+          "rule": "case_insensitive"
+        },
+        "amorphous": {
+          "options": [
+            "Amorphous"
+          ],
+          "rule": "case_insensitive"
+        },
+        "linear": {
+          "options": [
+            "Linear"
+          ],
+          "rule": "case_insensitive"
+        },
+        "branching": {
+          "options": [
+            "Branching"
+          ],
+          "rule": "case_insensitive"
+        }
+      },
+      "unreachable": {
+        "Coarse/Popcorn": {
+          "category": "not_covered"
+        },
+        "Present, Not Otherwise Specified": {
+          "category": "generic_not_otherwise_specified"
+        },
+        "Unable to confirm": {
+          "category": "unable_to_confirm"
+        }
+      }
+    },
+    "Special_Features.Squamous_Sebaceous_Differentiation": {
+      "prompt_options": [
+        "Absent",
+        "Squamous",
+        "Sebaceous",
+        "Present, Not Otherwise Specified",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Absent",
+        "Squamous",
+        "Sebaceous",
+        "Present, Not Otherwise Specified",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent": {
+          "options": [
+            "Absent"
+          ],
+          "rule": "exact"
+        },
+        "Squamous": {
+          "options": [
+            "Squamous"
+          ],
+          "rule": "exact"
+        },
+        "Sebaceous": {
+          "options": [
+            "Sebaceous"
+          ],
+          "rule": "exact"
+        },
+        "Present, Not Otherwise Specified": {
+          "options": [
+            "Present, Not Otherwise Specified"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Special_Features.Stromal_Characteristics": {
+      "prompt_options": [
+        "Fibrofatty/Loose Intralobular",
+        "Desmoplastic/Fibrotic",
+        "Fibroelastotic",
+        "Myxoid/Chondromyxoid",
+        "Oedematous",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Fibrofatty/Loose Intralobular",
+        "Desmoplastic/Fibrotic",
+        "Fibroelastotic",
+        "Myxoid/Chondromyxoid",
+        "Oedematous",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Fibrofatty/Loose Intralobular": {
+          "options": [
+            "Fibrofatty/Loose Intralobular"
+          ],
+          "rule": "exact"
+        },
+        "Desmoplastic/Fibrotic": {
+          "options": [
+            "Desmoplastic/Fibrotic"
+          ],
+          "rule": "exact"
+        },
+        "Fibroelastotic": {
+          "options": [
+            "Fibroelastotic"
+          ],
+          "rule": "exact"
+        },
+        "Myxoid/Chondromyxoid": {
+          "options": [
+            "Myxoid/Chondromyxoid"
+          ],
+          "rule": "exact"
+        },
+        "Oedematous": {
+          "options": [
+            "Oedematous"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    },
+    "Special_Features.Tumour_Infiltrating_Lymphocytes": {
+      "prompt_options": [
+        "Absent/Sparse",
+        "Mild/Moderate",
+        "Prominent/Rich",
+        "N/A"
+      ],
+      "criteria_options": [
+        "Absent/Sparse",
+        "Mild/Moderate",
+        "Prominent/Rich",
+        "Unable to confirm"
+      ],
+      "mapping": {
+        "Absent/Sparse": {
+          "options": [
+            "Absent/Sparse"
+          ],
+          "rule": "exact"
+        },
+        "Mild/Moderate": {
+          "options": [
+            "Mild/Moderate"
+          ],
+          "rule": "exact"
+        },
+        "Prominent/Rich": {
+          "options": [
+            "Prominent/Rich"
+          ],
+          "rule": "exact"
+        },
+        "N/A": {
+          "options": [
+            "Unable to confirm"
+          ],
+          "rule": "global_alias"
+        }
+      },
+      "unreachable": {}
+    }
+  }
+}

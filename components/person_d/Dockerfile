@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04
+FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04 AS runtime
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -14,7 +14,10 @@ COPY components/person_d/requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --no-cache-dir --disable-pip-version-check \
       -r /tmp/requirements.txt
 COPY contracts /app/contracts
-COPY components/person_d /app/components/person_d
+# Runtime files only: the tests and the examples (with the synthetic TIFF) are in the test target.
+COPY components/person_d/*.py components/person_d/*.json components/person_d/component.yaml \
+     /app/components/person_d/
+COPY components/person_d/configs /app/components/person_d/configs
 RUN touch /app/components/__init__.py
 # torch derives the default inductor cache from the user name, which fails for a UID without a
 # passwd entry (integration/compose.yaml runs as LOCAL_UID). torch only creates this empty
@@ -24,3 +27,12 @@ ENV PYTHONPATH=/app \
     TRANSFORMERS_OFFLINE=1 \
     TORCHINDUCTOR_CACHE_DIR=/run/cache/person_d/torchinductor
 ENTRYPOINT ["python3", "-m", "components.person_d.visual_filter"]
+
+# docker build --target test: the runtime image plus the tests, the examples and the mapping
+# document that tests/test_mapping.py compares with mapping_acceptance.json.
+FROM runtime AS test
+COPY components/person_d/tests /app/components/person_d/tests
+COPY components/person_d/examples /app/components/person_d/examples
+COPY components/person_d/MAPPING.md /app/components/person_d/MAPPING.md
+
+FROM runtime
