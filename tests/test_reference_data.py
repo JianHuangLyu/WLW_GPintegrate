@@ -23,16 +23,27 @@ class ReferenceDataTests(unittest.TestCase):
                 json.dumps({"Histologic_Type_mappingTable": {"Custom": "Target"}}),
                 encoding="utf-8",
             )
-            mapping, provenance = load_histologic_mapping(path)
+            mapping, provenance = load_histologic_mapping(
+                path, integrity_mode="record_only"
+            )
             self.assertEqual({"Custom": "Target"}, mapping)
             self.assertEqual("mapping.json", provenance["source_name"])
+            self.assertEqual("record_only", provenance["integrity_mode"])
 
     def test_type_level_filename_revision_and_polarity_are_canonicalized(self) -> None:
         candidate_path = PERSON_A_REFERENCE / "candidateReference.json"
         type_level_path = (
             PERSON_A_REFERENCE / "[typeLevel]visualAttrs_v1.2.1_2603241656.json"
         )
-        _, type_levels, _ = load_visual_references(candidate_path, type_level_path)
+        _, type_levels, provenance = load_visual_references(
+            candidate_path, type_level_path
+        )
+        self.assertTrue(
+            provenance["candidate_reference"]["integrity_verified"]
+        )
+        self.assertTrue(
+            provenance["type_level_visual_attrs"]["integrity_verified"]
+        )
         self.assertTrue(type_levels)
         self.assertTrue(all(item["version"] == "1.2.1" for item in type_levels))
         self.assertTrue(

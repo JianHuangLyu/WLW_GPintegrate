@@ -22,6 +22,53 @@ CONDITION_LABELS = {
 }
 
 
+def _index_chunks(
+    dx_payload: dict[str, Any],
+    chunks: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Validate F linkage and return chunks ordered by retrieval rank."""
+
+    dx_pair_ids = [
+        str(record["dx_pair_id"]) for record in dx_items(dx_payload).values()
+    ]
+    if len(dx_pair_ids) != len(set(dx_pair_ids)):
+        raise ValueError("D contains duplicate dx_pair_id values")
+    known_dx_pairs = set(dx_pair_ids)
+
+    by_dx: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    seen_chunk_ids: set[str] = set()
+    seen_ranks: dict[str, set[int]] = defaultdict(set)
+    foreign_dx_pairs: set[str] = set()
+
+    for chunk in chunks:
+        chunk_id = str(chunk["chunk_id"])
+        dx_pair_id = str(chunk["dx_pair_id"])
+        retrieval_rank = int(chunk["retrieval_rank"])
+        if chunk_id in seen_chunk_ids:
+            raise ValueError(f"F contains duplicate chunk_id {chunk_id!r}")
+        seen_chunk_ids.add(chunk_id)
+        if dx_pair_id not in known_dx_pairs:
+            foreign_dx_pairs.add(dx_pair_id)
+            continue
+        if retrieval_rank in seen_ranks[dx_pair_id]:
+            raise ValueError(
+                f"F contains duplicate retrieval_rank {retrieval_rank} for "
+                f"DxPair {dx_pair_id!r}"
+            )
+        seen_ranks[dx_pair_id].add(retrieval_rank)
+        by_dx[dx_pair_id].append(chunk)
+
+    if foreign_dx_pairs:
+        raise ValueError(
+            "F contains chunks for dx_pair_id values absent from D: "
+            f"{sorted(foreign_dx_pairs)}"
+        )
+
+    for dx_pair_id in by_dx:
+        by_dx[dx_pair_id].sort(key=lambda chunk: int(chunk["retrieval_rank"]))
+    return by_dx
+
+
 def _merge_learned_attributes(
     criteria: dict[str, Any],
     generated: dict[str, Any],
@@ -128,12 +175,16 @@ def generate_artifact(
 ) -> dict[str, Any]:
     case_id = ensure_same_case(dx_artifact, chunks_artifact)
     payload = deepcopy(dx_artifact["payload"])
+    integrity_mode = config.get("asset_integrity", "enforce")
 
     mapping, mapping_provenance = load_histologic_mapping(
-        config["histologic_mapping_path"]
+        config["histologic_mapping_path"],
+        integrity_mode=integrity_mode,
     )
     candidate_document, type_levels, visual_provenance = load_visual_references(
-        config["candidate_reference_path"], config["type_level_path"]
+        config["candidate_reference_path"],
+        config["type_level_path"],
+        integrity_mode=integrity_mode,
     )
     type_levels_by_result = {item["DxResult"]: item for item in type_levels}
     payload["candidateReference"] = candidate_document
@@ -141,6 +192,7 @@ def generate_artifact(
     payload["reference_versions"]["histologic_type_mapping"] = mapping_provenance
 
     backend_config = deepcopy(config.get("backend") or {"mode": "reference"})
+    backend_config["asset_integrity"] = integrity_mode
     backend_mode = str(backend_config.get("mode", "reference"))
     if backend_mode not in {"reference", "learnable_soft_prompt"}:
         raise ValueError(
@@ -148,12 +200,14 @@ def generate_artifact(
             "learnable_soft_prompt"
         )
 
-    by_dx: dict[str, list[dict]] = defaultdict(list)
-    for chunk in chunks_artifact["payload"]["chunks"]:
-        by_dx[chunk["dx_pair_id"]].append(chunk)
+    by_dx = _index_chunks(
+        dx_artifact["payload"],
+        chunks_artifact["payload"]["chunks"],
+    )
 
     query_index = 1
     learnable_provenance: dict[str, Any] | None = None
+    selected_chunks_by_dx_pair: dict[str, list[dict[str, Any]]] = {}
     for dx_item, record in dx_items(payload).items():
         record["visualAttrQueries"] = []
         if dx_item != "Histologic_Type":
@@ -179,6 +233,13 @@ def generate_artifact(
                     f"the trained soft prompt requires {required_chunk_count}"
                 )
             used_chunks = chunks[:required_chunk_count]
+            selected_chunks_by_dx_pair[record["dx_pair_id"]] = [
+                {
+                    "chunk_id": chunk["chunk_id"],
+                    "retrieval_rank": int(chunk["retrieval_rank"]),
+                }
+                for chunk in used_chunks
+            ]
             if generator is None:
                 generator = _learnable_generator(backend_config)
             dx_text = record.get("DxResultRawTxt") or record["DxResultTxt"]
@@ -214,6 +275,12 @@ def generate_artifact(
         query_index += 1
 
     if learnable_provenance is not None:
+        learnable_provenance["chunk_selection_rule"] = (
+            "ascending_retrieval_rank_top_n"
+        )
+        learnable_provenance["selected_chunks_by_dx_pair"] = (
+            selected_chunks_by_dx_pair
+        )
         payload["reference_versions"][
             "learnable_query_generation"
         ] = learnable_provenance

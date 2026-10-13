@@ -48,7 +48,20 @@ reference/person_a/
 `external-assets.yaml` records their expected paths and SHA-256 values. Mount
 the sibling `reference/` directory read-only at `/reference` and the sibling
 `run/` directory read-write at `/run`. Set `HF_TOKEN` at runtime; do not store it
-in a config file.
+in a config file. Production configs enforce the manifest: undeclared paths or
+SHA-256 mismatches fail before model loading. Synthetic tests explicitly use
+record-only integrity mode.
+
+For an offline Hugging Face mirror, export every snapshot file's size and
+SHA-256 from the pinned revision directory:
+
+```bash
+python -m components.person_a.hf_snapshot_manifest \
+  --model-id google/gemma-3-1b-it \
+  --revision dcc83ea841ab6100d6b47a070329e1ba4cf78752 \
+  --snapshot ../run/cache/huggingface/hub/models--google--gemma-3-1b-it/snapshots/dcc83ea841ab6100d6b47a070329e1ba4cf78752 \
+  --output ../run/output/person_a_assets/gemma-3-1b-it.snapshot.json
+```
 
 ## CLI
 

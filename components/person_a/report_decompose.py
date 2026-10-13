@@ -194,7 +194,8 @@ def build_artifact(
         return _example_artifact(source, producer)
 
     candidate_reference, candidate_provenance = load_dx_candidates(
-        config["dx_candidates_path"]
+        config["dx_candidates_path"],
+        integrity_mode=config.get("asset_integrity", "enforce"),
     )
     full_catalog = candidate_reference["DxItems"]
     requested = source["DxItem_list"]

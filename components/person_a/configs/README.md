@@ -9,6 +9,11 @@
   The checked-in profile uses CPU offload for low-memory GPUs; an HPC runtime
   config may set `device_map_strategy` to `single_device`.
 
+Production configs set `asset_integrity` to `enforce`. Every canonical
+reference/checkpoint path must be declared in `external-assets.yaml`, and the
+runtime fails before inference when its SHA-256 differs. `record_only` is
+reserved for synthetic tests or explicitly versioned experimental assets.
+
 Production paths are logical sibling paths under `../reference/person_a/`. Runtime model
 downloads and caches belong under `../run/cache/`. Configs must not contain credentials,
 developer home directories, report data, WSI data, or model files.

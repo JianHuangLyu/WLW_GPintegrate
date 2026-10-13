@@ -77,7 +77,10 @@ def build_case_list(
         )
     dx_item_list = config.get("dx_item_list")
     if not dx_item_list:
-        candidate_reference, _ = load_dx_candidates(config["dx_candidates_path"])
+        candidate_reference, _ = load_dx_candidates(
+            config["dx_candidates_path"],
+            integrity_mode=config.get("asset_integrity", "enforce"),
+        )
         dx_item_list = list(candidate_reference["DxItems"])
     return {
         "DxItem_list": list(dx_item_list),

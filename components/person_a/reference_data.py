@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from copy import deepcopy
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
 
+from components.person_a.asset_integrity import verify_external_asset
 from contracts.paths import resolve_person_reference_path, sibling_logical_path
+
 
 def resolve_reference(configured_path: str | Path) -> Path:
     """Resolve an external Person A asset and enforce reference/person_a/."""
@@ -19,33 +20,55 @@ def resolve_reference(configured_path: str | Path) -> Path:
     return path
 
 
-def load_reference(configured_path: str | Path) -> tuple[Any, dict[str, str]]:
+def load_reference(
+    configured_path: str | Path,
+    *,
+    integrity_mode: str = "enforce",
+) -> tuple[Any, dict[str, Any]]:
     path = resolve_reference(configured_path)
     raw = path.read_bytes()
+    integrity = verify_external_asset(path, integrity_mode=integrity_mode)
     return json.loads(raw.decode("utf-8")), {
         "source_name": path.name,
         "source_path": sibling_logical_path(path),
-        "sha256": hashlib.sha256(raw).hexdigest(),
+        **integrity,
     }
 
 
-def load_dx_candidates(configured_path: str | Path) -> tuple[dict[str, Any], dict[str, str]]:
-    document, provenance = load_reference(configured_path)
+def load_dx_candidates(
+    configured_path: str | Path,
+    *,
+    integrity_mode: str = "enforce",
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    document, provenance = load_reference(
+        configured_path, integrity_mode=integrity_mode
+    )
     return document["structured_report"], provenance
 
 
 def load_histologic_mapping(
     configured_path: str | Path,
-) -> tuple[dict[str, str], dict[str, str]]:
-    document, provenance = load_reference(configured_path)
+    *,
+    integrity_mode: str = "enforce",
+) -> tuple[dict[str, str], dict[str, Any]]:
+    document, provenance = load_reference(
+        configured_path, integrity_mode=integrity_mode
+    )
     return document["Histologic_Type_mappingTable"], provenance
 
 
 def load_visual_references(
-    candidate_path: str | Path, type_level_path: str | Path
-) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, dict[str, str]]]:
-    candidate_document, candidate_provenance = load_reference(candidate_path)
-    type_levels_document, type_level_provenance = load_reference(type_level_path)
+    candidate_path: str | Path,
+    type_level_path: str | Path,
+    *,
+    integrity_mode: str = "enforce",
+) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    candidate_document, candidate_provenance = load_reference(
+        candidate_path, integrity_mode=integrity_mode
+    )
+    type_levels_document, type_level_provenance = load_reference(
+        type_level_path, integrity_mode=integrity_mode
+    )
     candidate = candidate_document["visualAttrs"]
     type_levels = deepcopy(type_levels_document)
 

@@ -140,6 +140,7 @@ def _f_artifact(count: int = 3) -> dict:
                 "section_title": "Histopathology",
                 "source_href": None,
                 "text": f"Reference evidence {index + 1}",
+                "retrieval_rank": index + 1,
                 "relevance_score": 1.0,
             }
         )
@@ -229,6 +230,7 @@ class LearnableQueryGenerationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=PERSON_A_REFERENCE) as temp_dir:
             config = {
                 "component_version": "person-a/query-generation:0.7.0",
+                "asset_integrity": "record_only",
                 **_write_references(Path(temp_dir)),
                 "backend": {"mode": "reference"},
             }
@@ -253,6 +255,7 @@ class LearnableQueryGenerationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=PERSON_A_REFERENCE) as temp_dir:
             config = {
                 "component_version": "person-a/query-generation:0.7.0",
+                "asset_integrity": "record_only",
                 **_write_references(Path(temp_dir)),
                 "backend": {
                     "mode": "learnable_soft_prompt",
@@ -260,8 +263,10 @@ class LearnableQueryGenerationTest(unittest.TestCase):
                 },
             }
             generator = FakeLearnableGenerator()
+            chunks = _f_artifact(count=5)
+            chunks["payload"]["chunks"].reverse()
             artifact = generate_artifact(
-                _d_artifact(), _f_artifact(), config, generator=generator
+                _d_artifact(), chunks, config, generator=generator
             )
 
         validate_artifact(artifact, "G.VisualAttributeQueries")
@@ -297,11 +302,27 @@ class LearnableQueryGenerationTest(unittest.TestCase):
             artifact["payload"]["reference_versions"]
             ["learnable_query_generation"]["checkpoint_sha256"],
         )
+        selection = artifact["payload"]["reference_versions"][
+            "learnable_query_generation"
+        ]
+        self.assertEqual(
+            "ascending_retrieval_rank_top_n",
+            selection["chunk_selection_rule"],
+        )
+        self.assertEqual(
+            [
+                {"chunk_id": "case-001-chunk-001", "retrieval_rank": 1},
+                {"chunk_id": "case-001-chunk-002", "retrieval_rank": 2},
+                {"chunk_id": "case-001-chunk-003", "retrieval_rank": 3},
+            ],
+            selection["selected_chunks_by_dx_pair"]["case-001-dx-001"],
+        )
 
     def test_learnable_backend_fails_when_f_has_fewer_than_three_chunks(self) -> None:
         with tempfile.TemporaryDirectory(dir=PERSON_A_REFERENCE) as temp_dir:
             config = {
                 "component_version": "person-a/query-generation:0.7.0",
+                "asset_integrity": "record_only",
                 **_write_references(Path(temp_dir)),
                 "backend": {
                     "mode": "learnable_soft_prompt",
@@ -315,6 +336,32 @@ class LearnableQueryGenerationTest(unittest.TestCase):
                     config,
                     generator=FakeLearnableGenerator(),
                 )
+
+    def test_f_rejects_duplicate_rank_chunk_id_and_foreign_dx_pair(self) -> None:
+        with tempfile.TemporaryDirectory(dir=PERSON_A_REFERENCE) as temp_dir:
+            config = {
+                "component_version": "person-a/query-generation:0.7.0",
+                "asset_integrity": "record_only",
+                **_write_references(Path(temp_dir)),
+                "backend": {"mode": "reference"},
+            }
+
+            duplicate_rank = _f_artifact()
+            duplicate_rank["payload"]["chunks"][1]["retrieval_rank"] = 1
+            with self.assertRaisesRegex(ValueError, "duplicate retrieval_rank"):
+                generate_artifact(_d_artifact(), duplicate_rank, config)
+
+            duplicate_id = _f_artifact()
+            duplicate_id["payload"]["chunks"][1]["chunk_id"] = (
+                duplicate_id["payload"]["chunks"][0]["chunk_id"]
+            )
+            with self.assertRaisesRegex(ValueError, "duplicate chunk_id"):
+                generate_artifact(_d_artifact(), duplicate_id, config)
+
+            foreign = _f_artifact()
+            foreign["payload"]["chunks"][0]["dx_pair_id"] = "foreign-dx"
+            with self.assertRaisesRegex(ValueError, "absent from D"):
+                generate_artifact(_d_artifact(), foreign, config)
 
     def test_attribute_reference_and_strict_json_validation(self) -> None:
         attributes = {

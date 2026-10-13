@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+from components.person_a.asset_integrity import verify_external_asset
 from contracts.paths import resolve_person_reference_path
 
 SOFT_PROMPT_MARKER = "<SOFT_PROMPT_INSERT>"
@@ -31,14 +32,6 @@ CONDITION_LABELS = {
 
 class LearnableQueryGenerationError(ValueError):
     """Raised when model inputs or generated attributes are not usable."""
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _flatten(document: dict[str, Any], prefix: str = "") -> dict[str, Any]:
@@ -249,6 +242,7 @@ class LearnableSoftPromptGenerator:
             "person_a", config["attribute_reference_path"]
         )
         self.required_chunk_count = int(config.get("required_chunk_count", 3))
+        self.asset_integrity = str(config.get("asset_integrity", "enforce"))
         self.max_input_len = int(config.get("max_input_len", 8192))
         self.max_new_tokens = int(config.get("max_new_tokens", 768))
         self.require_cuda = bool(config.get("require_cuda", True))
@@ -273,22 +267,28 @@ class LearnableSoftPromptGenerator:
             raise ValueError(
                 "device_map_strategy must be single_device or auto_cpu_offload"
             )
-        if not self.checkpoint_path.is_file():
-            raise FileNotFoundError(
-                f"Soft-prompt checkpoint was not found: {self.checkpoint_path}"
-            )
+        checkpoint_integrity = verify_external_asset(
+            self.checkpoint_path,
+            integrity_mode=self.asset_integrity,
+        )
+        attribute_integrity = verify_external_asset(
+            self.attribute_reference_path,
+            integrity_mode=self.asset_integrity,
+        )
 
         (
             self.attribute_template,
             self.allowed_values,
             reference_provenance,
         ) = load_attribute_reference(self.attribute_reference_path)
+        reference_provenance.update(attribute_integrity)
         self.provenance = {
             "backend": "learnable_soft_prompt",
             "model_name": self.model_name,
             "model_revision": self.model_revision,
             "checkpoint_name": self.checkpoint_path.name,
-            "checkpoint_sha256": _sha256(self.checkpoint_path),
+            "checkpoint_sha256": checkpoint_integrity["sha256"],
+            "checkpoint_integrity": checkpoint_integrity,
             "attribute_reference": reference_provenance,
             "required_chunk_count": self.required_chunk_count,
             "target_format": TARGET_FORMAT,

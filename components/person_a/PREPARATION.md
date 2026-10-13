@@ -197,6 +197,7 @@ run/output/                                # D、G、暫存與測試產物
 - 超參數、feature flag 與 logical path 放在 `configs/`，不得散落於 Python 常數。
 - 模型、reference table、院端資料與 credential 不得進 Git 或 image。
 - 外部資產須在 `external-assets.yaml` 列出名稱、revision、SHA-256、授權與預期 mount path。
+- 正式 config 使用 `asset_integrity: enforce`；路徑未宣告或 SHA-256 不符時必須停止。
 - runtime 只寫入 sibling `run/`；不得在 component 或 `reference/` 下產生 cache。
 
 ## 4. Unified CLI
@@ -257,18 +258,17 @@ components/person_a/examples/
 ├── report_decompose/
 │   ├── case_list.valid.json
 │   ├── D_dx_pairs.expected.json
-│   ├── config.example.json
 │   └── README.md
 └── query_generation/
     ├── D_dx_pairs.valid.json
     ├── F_chunks.valid.json
     ├── G_queries.expected.json
-    ├── config.example.json
     └── README.md
 ```
 
 範例不得包含 PHI、院端原始報告或私有 mapping；使用合成內容並確保 expected output 可重現且通過
-canonical schema。另至少加入一個 invalid input，驗證元件會 non-zero fail。
+canonical schema。兩組範例共用合法路徑下的 `components/person_a/configs/example.json`。另至少加入一個
+invalid input，並以 subprocess 執行正式 CLI，驗證元件會 non-zero fail 且不留下部分輸出。
 
 ## 7. README 必填資訊
 

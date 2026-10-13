@@ -3,3 +3,4 @@ transformers==5.16.1
 accelerate==1.14.0
 bitsandbytes==0.50.1
 sentencepiece==0.2.1
+PyYAML==6.0.3

@@ -41,6 +41,10 @@ and revisions are declared in `external-assets.yaml`.
 
 Person B only needs to provide schema-valid F chunks containing `dx_pair_id`,
 `chunk_id`, and non-empty `text`. Person A does not import Person B code.
+Chunks for each DxPair are ordered by ascending `retrieval_rank`; the learned
+backend uses the configured top N (currently three). Duplicate `chunk_id`,
+duplicate rank within one DxPair, or a chunk whose `dx_pair_id` is absent from
+D is rejected. G records the selected IDs and ranks in provenance.
 
 ## Run without Docker
 
@@ -91,6 +95,8 @@ set `device_map_strategy` to `single_device` in an external runtime config.
 
 - D and F pass their schemas and share `case_id`.
 - Each mapped Histologic Type has at least three matching F chunks.
+- F has unique chunk IDs and unique retrieval ranks per DxPair, with no foreign
+  `dx_pair_id` values.
 - Query `dx_pair_id` and `chunk_ids` identify the actual inputs used.
 - Every visual option receives exactly one legal condition.
 - G passes `G_visual_attribute_queries.schema.json` and preserves D metadata.
