@@ -24,6 +24,10 @@ RUN pip install --no-cache-dir --disable-pip-version-check --root-user-action=ig
 # under /reference/person_b/ (compose mounts ../../reference at /reference).
 COPY contracts /app/contracts
 COPY components/person_b /app/components/person_b
+# Person B's own tests (about 40 KB; they need no model, index or corpus), so the documented
+#   docker run --rm --entrypoint python <image> -m unittest tests.test_dense_retrieval tests.test_person_b_examples -v
+# runs inside the image that is shipped. The other root tests belong to other components.
+COPY tests/test_dense_retrieval.py tests/test_person_b_examples.py /app/tests/
 RUN touch /app/components/__init__.py
 ENV PYTHONPATH=/app
 ENTRYPOINT ["python", "-m", "components.person_b.knowledge_retrieval"]

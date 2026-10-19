@@ -46,6 +46,10 @@ How the digests are defined (the same code verifies them at runtime):
 - knowledge base: `files_sha256` over `embeddings.npy` and `sections.json`; `manifest.json` records
   it and is excluded.
 
+`external-assets.yaml` lists every asset with its source, revision, SHA-256 (also per file for the
+model and the index), size, licence/access policy, logical path and dependencies. **The licence of
+the corpus is unconfirmed** (see there); the model is Apache-2.0.
+
 The model directory is a copy of the Hugging Face snapshot above without `README.md`. The runtime
 never downloads anything (`HF_HUB_OFFLINE=1` in the image).
 
@@ -122,8 +126,17 @@ docker run --rm --gpus all \
 The image holds code and libraries only (torch 2.6.0 cu124 wheel, same as Person A's image). The
 corpus, model and knowledge base are mounted.
 
+Run Person B's own tests inside the image (they need no model, index or corpus; the image carries
+only `tests/test_dense_retrieval.py` and `tests/test_person_b_examples.py`):
+
+```bash
+docker run --rm --entrypoint python wlw/person-b:0.5.0 \
+  -m unittest tests.test_dense_retrieval tests.test_person_b_examples -v
+```
+
 Verified: `docker build --no-cache` succeeds (about 22 min, almost all of it downloading the CUDA
-torch wheels; image 3.2 GB). Inside the image the libraries are exactly the pinned versions and
+torch wheels). Size: about 3.0 GB compressed, about 6 GB of layers once unpacked (the CUDA torch
+layer is 5.3 GB); `docker images` on Docker Desktop's image store reports 9.09 GB. Inside the image the libraries are exactly the pinned versions and
 `torch.cuda.is_available()` is true with `--gpus all`. Running the command above with the real model,
 knowledge base and a real D gives the same F as the host run, on GPU and on CPU (same sections,
 ranks and `dense_score` to 6 decimals; the whole run, including model digest check, took about
@@ -166,8 +179,10 @@ ranks and `dense_score` to 6 decimals; the whole run, including model digest che
 
 - `examples/prepare_literature/` and `examples/knowledge_retrieval/`: synthetic, redistributable
   inputs with expected outputs (see their READMEs).
-- `tests/test_dense_retrieval.py` (retrieval, index verification, adapter) and
-  `tests/test_person_b_examples.py` (the examples stay reproducible):
+- `tests/test_dense_retrieval.py` (retrieval, index verification, adapter),
+  `tests/test_person_b_examples.py` (the examples stay reproducible) and
+  `tests/test_person_b_assets.py` (`external-assets.yaml` agrees with this README, the configs and
+  `component.yaml`; skipped when PyYAML is missing):
 
 ```bash
 python -m unittest tests.test_dense_retrieval tests.test_person_b_examples
