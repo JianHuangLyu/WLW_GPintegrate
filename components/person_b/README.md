@@ -21,6 +21,12 @@ Person A's query generation).
 (5th ed.) text export: 87 diseases, 1349 sections, of which 93 are literal `"None"`, leaving
 **1256 indexed sections**. It has no upstream revision number; it is identified by its SHA-256.
 
+- **Source and acknowledgement:** International Agency for Research on Cancer (IARC), *WHO
+  Classification of Tumours Online*, Breast Tumours (5th ed.), https://tumourclassification.iarc.who.int .
+  The lab obtained the text through its subscription account. The corpus is **not** in this repository.
+  IARC's copyright notice allows extracts to be used for research with the source acknowledged, and
+  requires prior written authorization for substantial portions; see the policy in
+  `external-assets.yaml` before sharing the snapshot.
 - Source format, versioned by Person B: see `prepare_literature.py` (docstring).
 - There is no chapter hierarchy or URL in this source, so `title_list` is
   `[corpus title, null, null, disease name]` and `href` is `null`.

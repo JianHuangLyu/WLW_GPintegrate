@@ -19,7 +19,9 @@ assets:
     size_bytes: 1062669
     logical_path: "reference/person_b/checkpoint/rag_database"
     configured_by: "run prepare_literature with --source <logical_path> and configs/prepare_literature.rag_database.json"
-    license_or_access_policy: "UNCONFIRMED. Text of the WHO Classification of Tumours, Breast Tumours (5th ed.); redistribution terms have not been verified by the component owner. Treat as restricted: do not republish; share only through the project's access-controlled reference storage until the owner confirms the terms."
+    license_or_access_policy: "UNCONFIRMED, RESTRICTED. Text (and image captions) of the WHO Classification of Tumours, Breast Tumours (5th ed.), obtained by the lab through its subscription account. The IARC copyright notice linked from the site's welcome page ('(c) IARC 2026, All Rights Reserved') allows extracts to be reproduced for research or private study, not for sale or commercial use, with IARC acknowledged as the source and the URL cited; reproduction of substantial portions, or any use other than educational or other non-commercial purposes, requires explicit prior written authorization. This snapshot (87 diseases, 1349 sections) is a substantial portion, and no written authorization for sharing it outside the lab has been obtained. The lab's subscription agreement has not been checked. Do not republish; do not commit; share only through access-controlled reference storage once authorization or the lab's approval is in place."
+    permission_contact: "com@iarc.fr (as given in the IARC copyright notice)"
+    attribution_required: "International Agency for Research on Cancer (IARC), WHO Classification of Tumours Online, https://tumourclassification.iarc.who.int"
     contains_phi: false
     depends_on: []
     content:
@@ -32,7 +34,12 @@ assets:
     verification:
       algorithm: "sha256 over, for each *.json file in file-name string order, '<file name>\\0<raw bytes>\\0' (build_literature_artifact_from_rag_database)"
       check: "prepare_literature writes this value as payload.corpus.sha256 of A.Literature"
-    notes: "Provenance of the export itself (who scraped it, when, from where) is not recorded in the repository and must be supplied by the corpus owner."
+    provenance:
+      source: "WHO Classification of Tumours Online (https://tumourclassification.iarc.who.int), Breast Tumours 5th ed."
+      acquired_by: "the lab, logged in with its subscription account and extracted the pages with a scraper"
+      date_of_extraction: "not recorded"
+      images: "only metadata is present (id, diagnosis, legend, contributor name in 'source'); the image files are not part of this asset"
+    notes: "The subscription agreement has not been read against this use; it may be stricter than the public copyright notice. The image captions name individual contributors (for example 'Maria Pia Foschini', 'SGH Pathology'), whose rights may differ from those of the text."
 
   - asset_id: medembed-large-v0.1
     type: model_weight
