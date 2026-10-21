@@ -16,6 +16,7 @@ from typing import Any, Callable
 
 from components.person_d.assets import check_digest, required_digest
 from components.person_d.geometry import roi_geometry
+from components.person_d.mapping import load_acceptance
 from components.person_d.matching_filter import LabelMap, MatchingSettings, match_query
 from contracts.metadata import ensure_same_case, single_case
 from contracts.paths import resolve_person_reference_path, sibling_logical_path
@@ -136,7 +137,7 @@ def _stain_ids(case: dict[str, Any]) -> list[str]:
     return [stain["stain_id"] for block in case["tissue_blocks"] for stain in block["stains"]]
 
 
-def _check_criteria(query: dict[str, Any]) -> None:
+def _check_criteria(query: dict[str, Any], supported_version: str) -> None:
     """Reject a mapped query whose diagnosticCriteria cannot be matched."""
 
     criteria = query.get("diagnosticCriteria")
@@ -145,6 +146,11 @@ def _check_criteria(query: dict[str, Any]) -> None:
     query_id = query["query_id"]
     if not isinstance(criteria.get("version"), str) or not criteria["version"]:
         raise ValueError(f"Query {query_id} diagnosticCriteria is missing 'version'")
+    if criteria["version"] != supported_version:
+        raise ValueError(
+            f"Query {query_id} diagnosticCriteria version {criteria['version']!r} is not supported; "
+            f"Person D supports {supported_version!r}"
+        )
     visual_attrs = criteria.get("visualAttrs")
     if not isinstance(visual_attrs, dict):
         raise ValueError(f"Query {query_id} diagnosticCriteria is missing 'visualAttrs'")
@@ -156,7 +162,7 @@ def _check_criteria(query: dict[str, Any]) -> None:
                 )
 
 
-def _check_linkage(e_case: dict[str, Any], g_case: dict[str, Any]) -> None:
+def _check_linkage(e_case: dict[str, Any], g_case: dict[str, Any], supported_version: str) -> None:
     e_stains = _stain_ids(e_case)
     if set(e_stains) != set(_stain_ids(g_case)):
         raise ValueError(
@@ -182,7 +188,7 @@ def _check_linkage(e_case: dict[str, Any], g_case: dict[str, Any]) -> None:
                     f"Query {query['query_id']} dx_pair_id does not match {DxItem}"
                 )
             query_ids.append(query["query_id"])
-            _check_criteria(query)
+            _check_criteria(query, supported_version)
     if len(query_ids) != len(set(query_ids)):
         raise ValueError("G contains duplicate query_id values")
 
@@ -191,7 +197,8 @@ def validate_inputs(e_artifact: dict[str, Any], g_artifact: dict[str, Any]) -> s
     """Input boundary shared by example and native mode; returns the case_id.
 
     Checks case identity, data_mode, stain / pair / query linkage, the shape of every
-    mapped diagnosticCriteria and the metadata geometry of every ROI, so both modes
+    mapped diagnosticCriteria and that its version is the criteria version of the accepted
+    mapping (mapping_acceptance.json), and the metadata geometry of every ROI, so both modes
     accept or reject the same E/G pair.
     """
 
@@ -200,7 +207,7 @@ def validate_inputs(e_artifact: dict[str, Any], g_artifact: dict[str, Any]) -> s
     if e_mode != g_mode:
         raise ValueError(f"E/G data_mode values differ: E={e_mode!r}, G={g_mode!r}")
     e_case = single_case(e_artifact)
-    _check_linkage(e_case, single_case(g_artifact))
+    _check_linkage(e_case, single_case(g_artifact), load_acceptance()["criteria_version"])
     for block in e_case["tissue_blocks"]:
         for stain in block["stains"]:
             for roi in stain["roi_list"]:

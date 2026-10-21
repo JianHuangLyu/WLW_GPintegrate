@@ -58,6 +58,13 @@ def _with_evaluation_mode(g: dict) -> dict:
     return g
 
 
+def _with_criteria_version(g: dict, version: str) -> dict:
+    g = copy.deepcopy(g)
+    record = g["payload"]["case_list"][0]["structured_report"]["DxItems"]["Histologic_Type"]
+    record["visualAttrQueries"][0]["diagnosticCriteria"]["version"] = version
+    return g
+
+
 def _with_negative_width(e: dict) -> dict:
     e = copy.deepcopy(e)
     next(roi for _, roi in iter_rois(e["payload"]))["level0_info"]["xywh"][2] = -1
@@ -329,6 +336,14 @@ class NativeVisualFilterTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "diagnosticCriteria is missing 'version'"):
             build_example_artifact(self.e, g, "person-d/visual-filter:0.2.0")
 
+    def test_unsupported_criteria_version_fails_in_both_modes(self) -> None:
+        g = _with_criteria_version(self.g, "0.0.0")
+        message = "case-001-query-001 diagnosticCriteria version '0.0.0' is not supported; Person D supports '1.2.1'"
+        with self.assertRaisesRegex(ValueError, message):
+            self._build(_FakeExtractor({}), g=g)
+        with self.assertRaisesRegex(ValueError, message):
+            build_example_artifact(self.e, g, "person-d/visual-filter:0.2.0")
+
     def test_label_map_digest_is_enforced(self) -> None:
         self.config["matching"]["label_map_sha256"] = "0" * 64
         with self.assertRaisesRegex(ValueError, "label map SHA-256 mismatch"):
@@ -359,6 +374,7 @@ class ExampleModeTests(unittest.TestCase):
             for name, (e_doc, g_doc) in {
                 "data_mode": (e, _with_evaluation_mode(g)),
                 "geometry": (_with_negative_width(e), g),
+                "criteria_version": (e, _with_criteria_version(g, "0.0.0")),
             }.items():
                 e_path, g_path = Path(directory) / f"{name}_E.json", Path(directory) / f"{name}_G.json"
                 e_path.write_text(json.dumps(e_doc), encoding="utf-8")

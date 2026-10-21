@@ -17,7 +17,7 @@ from components.person_d.mapping import (
     summarize,
 )
 from components.person_d.matching_filter import LabelMap
-from contracts.paths import REFERENCE_ROOT
+from contracts.paths import PROJECT_ROOT, REFERENCE_ROOT
 
 
 COMPONENT = Path(__file__).resolve().parents[1]
@@ -48,6 +48,15 @@ class MappingAcceptanceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.acceptance = load_acceptance()
         self.criteria = _example_criteria()
+
+    def test_accepted_criteria_version_is_the_contract_version(self) -> None:
+        # visual_filter accepts only this version in both modes; it must be the version the
+        # metadata contract defines for diagnosticCriteria.
+        schema = json.loads(
+            (PROJECT_ROOT / "contracts/schemas/metadata_case_payload.schema.json").read_text(encoding="utf-8")
+        )
+        contract = schema["$defs"]["diagnosticCriteria"]["properties"]["version"]["const"]
+        self.assertEqual(contract, self.acceptance["criteria_version"])
 
     def test_acceptance_covers_every_option_of_the_criteria_version(self) -> None:
         self.assertEqual(self.acceptance["criteria_version"], self.criteria["version"])

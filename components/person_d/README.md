@@ -32,8 +32,9 @@ accept or reject the same E/G pair:
 - E/G `case_id` and `data_mode` are equal; H keeps that `data_mode`.
 - The E/G stain sets are equal, every `referenceWSI` names a known stain, every query's `dx_pair_id`
   equals its DxItem's, and `roi_id` and `query_id` do not repeat.
-- Every mapped query has a `diagnosticCriteria` with a `version` and, for each attribute, `options`
-  and `conditions`.
+- Every mapped query has a `diagnosticCriteria` whose `version` is the supported criteria version
+  (`1.2.1`, the `criteria_version` of `mapping_acceptance.json`, as in the metadata contract) and,
+  for each attribute, `options` and `conditions`.
 - Every ROI has a valid metadata geometry (`geometry.py`): integer `level0_info.xywh` with
   `x, y >= 0` and positive width and height, positive `main_info.roi_wh`, positive finite MPPs, and
   `roi_wh` within 1 px of the level-0 size times `level0_info.mpp / main_info.mpp`.
@@ -294,8 +295,9 @@ Results:
 
 In both modes the process exits non-zero and writes no H when: E/G `case_id`, `data_mode`, or stain
 sets differ; `referenceWSI` names an unknown stain; a query's `dx_pair_id` differs from its DxItem;
-`roi_id` or `query_id` repeats; a mapped query's `diagnosticCriteria` lacks `version`, `visualAttrs`,
-or an attribute's `options` / `conditions`; or a ROI's metadata geometry is invalid.
+`roi_id` or `query_id` repeats; a mapped query's `diagnosticCriteria` has a `version` other than
+`1.2.1`, or lacks `version`, `visualAttrs`, or an attribute's `options` / `conditions`; or a ROI's
+metadata geometry is invalid.
 
 In `native` mode it also fails when: a ROI lies outside the WSI or its `roi_path` crop is not exactly
 `roi_wh` pixels; the prompt asset or label map is missing or differs from its configured SHA-256; a
@@ -329,8 +331,8 @@ fails.
 - GPU floating-point differences can change scores near ties and therefore near-tie predictions.
 - Unsupported inputs: slide formats that OpenSlide 3.4.1 cannot open, `roi_path` crops that Pillow
   cannot read, and non-brightfield content (images are converted to RGB, so fluorescence or
-  multiplex channels are not used). `diagnosticCriteria` versions other than the label map's
-  `1.2.1` fail.
+  multiplex channels are not used). `diagnosticCriteria` versions other than
+  `1.2.1` fail in both modes.
 - The CONCH release does not include the CoCa `text_decoder`; it is unused because only the image
   and text encoders are called.
 - The native path has been run end to end with the official PLIP and CONCH checkpoints on synthetic
@@ -347,6 +349,7 @@ fails.
   `verify_assets`; 24-attribute vocabulary (prompt asset 1.1.0); accepted vocabulary-to-criteria
   mapping (`mapping_acceptance.json`, `MAPPING.md`) and no `selected` while a Must condition sits on
   an option the vocabulary cannot reach; SHA-256 checks for the PLIP support files; few-shot layout
-  validation (few-shot tree 1.0.1); runtime image without tests and examples (`test` build target).
+  validation (few-shot tree 1.0.1); runtime image without tests and examples (`test` build target);
+  the supported `diagnosticCriteria.version` checked in both modes.
   `example` mode output is otherwise unchanged except for the version string.
 - `0.1.0`: contract-only example stub.
