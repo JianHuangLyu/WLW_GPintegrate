@@ -142,7 +142,8 @@ containers have network access and a writable reference mount; the token is
 never passed to inference. Omit the switch when models are already prepared.
 
 The script makes a clean image build, executes root and canonical CLI tests in
-Linux against an isolated writable copy of the six small assets, then invokes
+Linux against an isolated writable copy of the six Person A assets and the two
+small Person E fixture JSONs required by the full repository suite, then invokes
 real MedGemma and Gemma using `/reference:ro`, `--network none`, and no token
 file. It checks schema-valid D/G and verified model provenance. Logs, outputs
 and `acceptance-summary.json` go under sibling `run/output/`. Failure is non-zero

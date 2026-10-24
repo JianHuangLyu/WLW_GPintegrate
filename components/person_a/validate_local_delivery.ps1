@@ -15,6 +15,7 @@ $utf8 = New-Object System.Text.UTF8Encoding($false)
 $results = [ordered]@{ status = 'running'; image = $Image; started = (Get-Date).ToString('o'); steps = @() }
 $results.repo_head = (& git -C $repoRoot rev-parse HEAD | Out-String).Trim()
 $results.prepare_models = [bool]$PrepareModels
+$results.build_skipped = [bool]$SkipBuild
 
 function Invoke-DockerCheck {
     param([string]$Name, [string[]]$DockerArgs)
@@ -48,21 +49,24 @@ print('Image source tree contains no model weights, credentials file or Python c
 '@
     Invoke-DockerCheck -Name 'image-content' -DockerArgs @('run', '--rm', '--network', 'none', '--entrypoint', 'python', $Image, '-c', $imageCheck)
 
-    # Unit tests get an isolated writable copy of only the six small assets.
+    # Full-repository tests also exercise Person E and the example pipeline.
+    # Copy their two small fixture JSONs, never a Person E model/checkpoint.
     # Production inference below mounts the real reference tree read-only.
     $testReference = Join-Path $validationRoot 'test-reference'
     $smallAssets = @(
-        'checkpoint/soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt',
-        'template_ref/DxStructuredCandidates_integrated.json',
-        'template_ref/Histologic_Type_mappingTable.json',
-        'template_ref/candidateReference.json',
-        'template_ref/[typeLevel]visualAttrs_v1.2.1_2603241656.json',
-        'template_ref/chunks_with_attribute_condition.json'
+        'person_a/checkpoint/soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt',
+        'person_a/template_ref/DxStructuredCandidates_integrated.json',
+        'person_a/template_ref/Histologic_Type_mappingTable.json',
+        'person_a/template_ref/candidateReference.json',
+        'person_a/template_ref/[typeLevel]visualAttrs_v1.2.1_2603241656.json',
+        'person_a/template_ref/chunks_with_attribute_condition.json',
+        'person_e/template_ref/fixture_label_space.json',
+        'person_e/template_ref/fixture_thresholds.json'
     )
     foreach ($asset in $smallAssets) {
-        $destination = Join-Path $testReference "person_a/$asset"
+        $destination = Join-Path $testReference $asset
         New-Item -ItemType Directory -Path (Split-Path $destination) -Force | Out-Null
-        Copy-Item -LiteralPath (Join-Path $referenceRoot "person_a/$asset") -Destination $destination
+        Copy-Item -LiteralPath (Join-Path $referenceRoot $asset) -Destination $destination
     }
     $testMounts = @('--rm', '--network', 'none', '-v', "${repoRoot}:/app:ro", '-v', "${testReference}:/reference", '-v', "${validationRoot}:/run", '--entrypoint', 'python', $Image)
     Invoke-DockerCheck -Name 'root-tests' -DockerArgs (@('run') + $testMounts + @('-m', 'unittest', 'discover', '-s', 'tests', '-v'))
@@ -83,14 +87,15 @@ print('Image source tree contains no model weights, credentials file or Python c
     $example = '/app/components/person_a/examples/local_model_delivery'
     Invoke-DockerCheck -Name 'prepare-smoke-f' -DockerArgs ($runtimeMounts + @('-m', 'components.person_a.prepare_delivery_smoke', '--output', '/run/F.reference-smoke.json'))
     Invoke-DockerCheck -Name 'medgemma-real-d' -DockerArgs ($runtimeMounts + @('-m', 'components.person_a.report_decompose', '--input', "$example/case_list.valid.json", '--output', '/run/D.medgemma.json', '--config', '/app/components/person_a/configs/report_decompose.default.json'))
-    Invoke-DockerCheck -Name 'gemma-real-g' -DockerArgs ($runtimeMounts + @('-m', 'components.person_a.query_generation', '--input', "$example/D_dx_pairs.valid.json", '--input', '/run/F.reference-smoke.json', '--output', '/run/G.gemma.json', '--config', '/app/components/person_a/configs/query_generation.single_device.json'))
-
     $check = @'
 import json
+import sys
 from pathlib import Path
 from contracts.runtime import validate_artifact
 from contracts.metadata import dx_items
 for filename, contract, key in [('D.medgemma.json','D.DxPairs','medgemma_report_extraction'),('G.gemma.json','G.VisualAttributeQueries','learnable_query_generation')]:
+    if filename != sys.argv[1]:
+        continue
     artifact=json.loads((Path('/run')/filename).read_text())
     validate_artifact(artifact,contract)
     provenance=artifact['payload']['reference_versions'][key]
@@ -105,7 +110,9 @@ for filename, contract, key in [('D.medgemma.json','D.DxPairs','medgemma_report_
         assert len(item['visualAttrQueries'])==1
     print(filename, 'schema and model provenance PASS')
 '@
-    Invoke-DockerCheck -Name 'provenance' -DockerArgs ($runtimeMounts + @('-c', $check))
+    Invoke-DockerCheck -Name 'medgemma-provenance' -DockerArgs ($runtimeMounts + @('-c', $check, 'D.medgemma.json'))
+    Invoke-DockerCheck -Name 'gemma-real-g' -DockerArgs ($runtimeMounts + @('-m', 'components.person_a.query_generation', '--input', "$example/D_dx_pairs.valid.json", '--input', '/run/F.reference-smoke.json', '--output', '/run/G.gemma.json', '--config', '/app/components/person_a/configs/query_generation.single_device.json'))
+    Invoke-DockerCheck -Name 'gemma-provenance' -DockerArgs ($runtimeMounts + @('-c', $check, 'G.gemma.json'))
     $results.status = 'passed'
 } catch {
     $results.status = 'failed'

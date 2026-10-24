@@ -14,7 +14,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File components/person_a/validate
 ```
 
 The script makes a clean image build, runs Linux unit/CLI tests against an
-isolated copy of the six small assets, then runs both real model entrypoints
+isolated copy of the six Person A assets plus two small Person E fixture
+JSONs required by the repository-wide tests, then runs both real model entrypoints
 with `--network none` and `/reference:ro`. It checks schemas and verified model
 provenance and writes logs and `acceptance-summary.json` below sibling `run/`.
 `-PrepareModels` downloads missing declared files using the existing authorized
