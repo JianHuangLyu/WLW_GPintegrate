@@ -5,8 +5,8 @@
 別人的研究實作。
 
 目前 `person_a` 為 0.9.0 正式 Report Decompose／Query Generation 實作，保留獨立的合成範例模式；
-正式模型與參考資產另放 sibling `reference/person_a/`，不進 Git 或 image。MedGemma 的授權固定模型
-與可信 manifest 尚待提供，詳見 `components/person_a/LOCAL_MODELS.md`。`person_b`～`person_d` 仍為
+正式模型與參考資產另放 sibling `reference/person_a/`，不進 Git 或 image。兩個模型的可信固定 manifest
+已提供；模型本體須另以授權方式準備，詳見 `components/person_a/LOCAL_MODELS.md`。`person_b`～`person_d` 仍為
 contract／pipeline 範例 stub；`person_e` 保留 CLEE 整合實作。stub 輸出只可用於介面測試，不得用於研究、
 診斷、效能評估或 benchmark。
 

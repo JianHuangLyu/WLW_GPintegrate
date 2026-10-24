@@ -38,7 +38,7 @@ External files are not committed or copied into the image:
 reference/person_a/
 ├── checkpoint/
 │   ├── gemma-3-1b-it/                 # complete materialized model directory
-│   ├── medgemma-1.5-4b-it/            # authorized pinned snapshot still required
+│   ├── medgemma-1.5-4b-it/            # complete authorized pinned model directory
 │   └── soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt
 └── template_ref/
     ├── DxStructuredCandidates_integrated.json
@@ -65,11 +65,12 @@ model identity/revision, or paths escaping the model root stop inference.
 Expected manifests are read afresh; runtime never regenerates its baseline.
 D/G provenance records verified identity, revision, manifest SHA and tree SHA.
 
-Gemma uses the seven-file fixed manifest in `model-manifests/`. MedGemma remains
-`BLOCKED_MISSING_ASSET`: the authorized pinned snapshot and a reviewed fixed
-manifest have not been supplied. CGMH model-invoked inference is blocked until
-both are available; Regex-only paths and public examples remain model-free.
-See [LOCAL_MODELS.md](LOCAL_MODELS.md) for preparation and verification commands.
+Both trusted manifests are versioned in `model-manifests/`: seven files for
+Gemma and fifteen for MedGemma. Deployments must materialize both authorized
+pinned model directories externally before model-invoked inference. Missing
+files fail closed; Regex-only paths and public examples remain model-free.
+See [LOCAL_MODELS.md](LOCAL_MODELS.md) for preparation, source attestation, and
+`validate_local_delivery.ps1` for reproducible clean-build/offline acceptance.
 
 The checked-in learnable profile caps GPU placement at `1200MiB` and allows
 `12GiB` CPU offload. Plan at least 16 GB host RAM including overhead; this is a

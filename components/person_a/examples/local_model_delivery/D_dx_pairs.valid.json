@@ -1,0 +1,69 @@
+{
+  "contract": "D.DxPairs",
+  "schema_version": "2.0",
+  "artifact_id": "D-case-001",
+  "case_id": "case-001",
+  "producer": "test",
+  "payload": {
+    "data_mode": "inference",
+    "DxItem_list": [
+      "Histologic_Type"
+    ],
+    "reference_versions": {},
+    "case_list": [
+      {
+        "sample_idx": 0,
+        "case_id": "case-001",
+        "hospital": "TEST",
+        "patient_info": {},
+        "date": "",
+        "source": {},
+        "organ": "Breast",
+        "report_raw_content": "Deidentified report",
+        "structured_report": {
+          "reportType": null,
+          "reportSubTypes": null,
+          "DxItems": {
+            "Histologic_Type": {
+              "dx_pair_id": "case-001-dx-001",
+              "source_report_id": "report-001",
+              "DxResultCls": "ADH",
+              "DxResultTxt": "Atypical ductal hyperplasia",
+              "DxResultRawTxt": "Focal atypical ductal hyperplasia",
+              "referenceBlock": null,
+              "referenceType": [
+                "HE"
+              ],
+              "referenceWSI": [
+                "case-001-he"
+              ],
+              "appear_reportTypes": [
+                "Pathology"
+              ],
+              "optionTypes": "single_choice",
+              "has_numericalData": false
+            }
+          }
+        },
+        "tissue_blocks": [
+          {
+            "block_id": "A",
+            "memo": "",
+            "stains": [
+              {
+                "stain_id": "case-001-he",
+                "stain_type": "HE",
+                "filename": "case-001-he.svs",
+                "filepath": "/data/case-001-he.svs",
+                "memo": "",
+                "roi_num": 0,
+                "roi_list": []
+              }
+            ]
+          }
+        ],
+        "memo": ""
+      }
+    ]
+  }
+}

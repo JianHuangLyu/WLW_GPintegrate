@@ -7,7 +7,7 @@ weights, or use a token at inference time.
 | Model ID | Pinned revision | Model directory below `reference/person_a/checkpoint/` | Delivery |
 |---|---|---|---|
 | `google/gemma-3-1b-it` | `dcc83ea841ab6100d6b47a070329e1ba4cf78752` | `gemma-3-1b-it/` | Fixed seven-file manifest supplied |
-| `google/medgemma-1.5-4b-it` | `91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b` | `medgemma-1.5-4b-it/` | `BLOCKED_MISSING_ASSET` |
+| `google/medgemma-1.5-4b-it` | `91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b` | `medgemma-1.5-4b-it/` | Fixed fifteen-file manifest supplied; weights external |
 
 The soft-prompt `.pt` remains alongside these directories. The paths above are
 the canonical layout used by both production configs and `external-assets.yaml`.
@@ -37,25 +37,38 @@ is `0925391b778e16eed1025e8c8581905f4c51a62022e49337aef4dcad2056d0b0`.
 Its file sizes/hashes, model ID, and revision are unchanged. No model content
 was used to generate a new runtime baseline.
 
-MedGemma has no trusted fixed manifest yet. Its null manifest fields are
-intentional: even a directory with the expected name must not be loaded until
-an authorized pinned snapshot and reviewed integrity metadata are provided.
-An authorized preparer can export candidate metadata from a revision-named,
-materialized snapshot under `run/`:
+MedGemma expected metadata is established from the official immutable Hub API
+for revision `91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b`. LFS file size/SHA-256
+comes directly from that revision's official metadata; small files were fetched
+from the same revision and independently checked against its Git blob IDs before
+fixing their SHA-256. This is separate from scanning a deployment's current tree.
+The fifteen-file manifest SHA-256 is
+`9e83fdd3b9b4871002b671af08abde51994de624534c0392922c65af52ccec7f`;
+total bytes are 8,639,646,105. See [MODEL_MANIFEST_SOURCES.md](MODEL_MANIFEST_SOURCES.md).
 
-```bash
-python -m components.person_a.hf_snapshot_manifest \
-  --model-id google/medgemma-1.5-4b-it \
-  --revision 91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b \
-  --snapshot ../run/model-preparation/91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b \
-  --output ../run/output/medgemma-1.5-4b-it.snapshot.json
+Download the complete pinned snapshot in an authorized environment, then copy
+only its fifteen declared files to the external model directory (including
+README/license context, tokenizer/processor files and both weight shards).
+HF local download cache metadata belongs under `run/`, not in the model tree.
+A download token may be needed for preparation; runtime does not use one.
+Verify with the command below after materialization. Do not replace expected
+metadata with hashes of arbitrary local files.
+
+The network-enabled preparation CLI uses the shipped expected manifests and
+keeps its download staging/cache under sibling `run/`:
+
+```powershell
+# Supply an authorized HF_TOKEN in the preparation process environment.
+python -m components.person_a.prepare_local_models --asset gemma-query-generator
+python -m components.person_a.prepare_local_models --asset medgemma-report-extractor
 ```
 
-This is preparation metadata, not proof that an arbitrary local tree is
-authentic. Confirm its source/revision independently before reviewing and
-versioning it in `model-manifests/` and pinning its SHA-256 in
-`external-assets.yaml`. Runtime never exports or approves new manifests.
-The real CGMH model-invoked path remains pending that delivery.
+This command deliberately enables Hub access only for preparation. It never
+accepts license terms, generates tokens or changes the expected manifest. It
+reuses matching files, rejects changed existing/downloaded files, materializes
+only the declared file bytes, and runs the production verifier at completion.
+Runtime loaders never invoke it. If downloading manually, preserve the same
+declared paths and run the production verification command afterwards.
 
 ## Verification without loading the model
 
@@ -114,3 +127,30 @@ token-free local-only loaders and retained soft-prompt compatibility checks.
 Symlink creation tests skip explicitly on Windows accounts lacking the OS
 privilege; run them on Linux for complete coverage. Mock tests do not establish
 real model inference; report real GPU/offline checks separately.
+
+## Reproducible acceptance
+
+From the repository root in an ordinary user PowerShell with Docker access:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File components/person_a/validate_local_delivery.ps1 -PrepareModels
+```
+
+With `-PrepareModels`, the script prepares missing pinned model files using the
+existing authorized `HF_TOKEN` in `integration/.env`. Only those preparation
+containers have network access and a writable reference mount; the token is
+never passed to inference. Omit the switch when models are already prepared.
+
+The script makes a clean image build, executes root and canonical CLI tests in
+Linux against an isolated writable copy of the six small assets, then invokes
+real MedGemma and Gemma using `/reference:ro`, `--network none`, and no token
+file. It checks schema-valid D/G and verified model provenance. Logs, outputs
+and `acceptance-summary.json` go under sibling `run/output/`. Failure is non-zero
+and is recorded as failed, including missing Docker permission or missing assets.
+
+The model smoke test uses a synthetic case and three ADH chunks from the mounted,
+SHA-verified reference vocabulary. Restricted source text is written only to
+`run/`; it is never committed. F uses explicitly synthetic retrieval metadata and
+whitespace token counts. This establishes model execution, not retrieval quality
+or generalization accuracy. Public generic F fixtures are for contract checks;
+model-generated malformed JSON is rejected rather than repaired.

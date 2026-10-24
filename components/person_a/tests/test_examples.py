@@ -25,6 +25,18 @@ def _json(path: Path) -> dict:
 
 
 class PersonAExampleTests(unittest.TestCase):
+    def test_local_model_acceptance_inputs_are_schema_valid(self) -> None:
+        directory = ROOT / "examples/local_model_delivery"
+        source = _json(directory / "case_list.valid.json")
+        d_artifact = _json(directory / "D_dx_pairs.valid.json")
+        f_artifact = _json(directory / "F_chunks.valid.json")
+        validate_case_list_input(source, single_case=True)
+        validate_artifact(d_artifact, "D.DxPairs")
+        validate_artifact(f_artifact, "F.Chunks")
+        self.assertEqual(d_artifact["case_id"], f_artifact["case_id"])
+        self.assertEqual(source["case_list"][0]["case_id"], d_artifact["case_id"])
+        self.assertEqual([1, 2, 3], [c["retrieval_rank"] for c in f_artifact["payload"]["chunks"]])
+
     def test_report_decompose_canonical_example(self) -> None:
         directory = ROOT / "examples/report_decompose"
         source = _json(directory / "case_list.valid.json")

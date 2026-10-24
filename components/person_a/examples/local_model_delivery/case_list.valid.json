@@ -1,0 +1,33 @@
+{
+  "DxItem_list": [
+    "Histologic_Type"
+  ],
+  "case_list": [
+    {
+      "sample_idx": 0,
+      "case_id": "case-001",
+      "hospital": "CGMH",
+      "patient_info": {},
+      "date": "",
+      "source": {},
+      "organ": "Breast",
+      "report_raw_content": "Synthetic test report. Diagnosis: atypical ductal hyperplasia.",
+      "tissue_blocks": [
+        {
+          "block_id": "A",
+          "memo": "",
+          "stains": [
+            {
+              "stain_id": "case-001-he",
+              "stain_type": "HE",
+              "filename": "case-001-he.svs",
+              "filepath": "/data/case-001-he.svs",
+              "memo": ""
+            }
+          ]
+        }
+      ],
+      "memo": ""
+    }
+  ]
+}

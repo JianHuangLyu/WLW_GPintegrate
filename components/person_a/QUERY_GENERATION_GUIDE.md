@@ -23,6 +23,12 @@ The learned backend emits every canonical visual option with one condition:
 `Negligible`, or `Not_Mentioned`. Output with missing/extra options or illegal
 conditions is rejected before G is written.
 
+Schema-valid F is not itself a guarantee of usable evidence or valid model
+output. Generic/uninformative chunk text can produce malformed generations;
+the runtime rejects them without repairing JSON or writing a partial artifact.
+The local-delivery smoke uses three known ADH chunks from the mounted fixed
+reference vocabulary to check execution, not retrieval/generalization quality.
+
 ## Required external files
 
 ```text

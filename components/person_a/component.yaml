@@ -15,11 +15,12 @@ runtime:
   cuda: "12.4"
   torch: "2.6.0+cu124"
   transformers: "5.16.1"
+  huggingface_hub: "1.14.0"
   model_id: google/medgemma-1.5-4b-it
   model_revision: 91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b
   quantization: bitsandbytes-nf4-4bit
   model_mount: /reference/person_a/checkpoint/medgemma-1.5-4b-it
-  model_delivery_status: BLOCKED_MISSING_ASSET
+  external_model_reference_required: true
   local_files_only: true
   model_integrity: fixed-tree-manifest-before-load
   query_generation_model_id: google/gemma-3-1b-it

@@ -40,10 +40,9 @@ assets:
     license: google-health-ai-developer-foundations
     source: huggingface:google/medgemma-1.5-4b-it
     expected_mount_path: /reference/person_a/checkpoint/medgemma-1.5-4b-it
-    tree_manifest: null
-    tree_manifest_sha256: null
-    delivery_status: BLOCKED_MISSING_ASSET
-    note: Authorized pinned snapshot and independently reviewed fixed tree manifest are still required. Runtime refuses loading until both are supplied.
+    tree_manifest: model-manifests/medgemma-1.5-4b-it-9185054.snapshot.json
+    tree_manifest_sha256: 9e83fdd3b9b4871002b671af08abde51994de624534c0392922c65af52ccec7f
+    note: Expected metadata is independently established from the official pinned Hub API (LFS SHA-256) and Git blob identities (small files). Runtime rejects incomplete materialization.
   - name: gemma-query-generator
     revision: dcc83ea841ab6100d6b47a070329e1ba4cf78752
     sha256: null

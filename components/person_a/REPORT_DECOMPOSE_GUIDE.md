@@ -41,11 +41,11 @@ Loading requires a reviewed fixed tree manifest and exact file verification;
 `from_pretrained` is local-only and needs no runtime token. Successful
 model-invoked D records `reference_versions.medgemma_report_extraction`.
 
-MedGemma is currently `BLOCKED_MISSING_ASSET`: the authorized pinned model
-and trusted tree manifest are absent. Its real CGMH inference remains untested
-until both are supplied. No different revision or online fallback is used.
-VGHTC Regex and canonical examples do not load this model. Preparation details
-are in [LOCAL_MODELS.md](LOCAL_MODELS.md).
+MedGemma has a trusted fifteen-file manifest shipped with the component.
+Prepare its authorized pinned model directory before invoking CGMH inference;
+missing/incomplete assets fail closed. No different revision or online fallback
+is used. VGHTC Regex and canonical examples do not load this model. Preparation
+and repeatable acceptance are in [LOCAL_MODELS.md](LOCAL_MODELS.md).
 
 ## Run
 

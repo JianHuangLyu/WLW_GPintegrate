@@ -205,8 +205,9 @@ run/output/                                # D、G、暫存與測試產物
 - 模型使用 `from_pretrained(model_path, local_files_only=True)`；本地推論不要求 HF token，
   也不下載或回退線上 ID。`record_only` 不會停用模型完整性驗證。
 - D/G 的 `reference_versions` 保存實際模型驗證結果；沒有呼叫模型時不宣稱已驗證模型。
-- MedGemma 的授權固定 snapshot 與可信 manifest 尚缺，標記 `BLOCKED_MISSING_ASSET`；
-  正式 CGMH model-invoked 路徑待資產齊備另驗收。準備步驟見 `LOCAL_MODELS.md`。
+- MedGemma 的可信十五檔 manifest 已依官方固定 revision 建立；模型本體仍須以授權方式另行交付。
+  缺檔不能視為通過。使用 `validate_local_delivery.ps1` 完成新版 Docker／離線／模型驗收，
+  以產生的 `acceptance-summary.json` 與實測報告為準。準備步驟見 `LOCAL_MODELS.md`。
 - RAM 規劃 16 GB（Gemma CPU offload 可用至 12 GiB，另留 overhead），不是已驗證最低需求；
   4 GB VRAM 也不是兩個模型共同的已認證最低規格。
 - runtime 只寫入 sibling `run/`；不得在 component 或 `reference/` 下產生 cache。

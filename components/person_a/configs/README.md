@@ -8,6 +8,9 @@
   it predicts one of six condition labels for every canonical visual option.
   The checked-in profile uses CPU offload for low-memory GPUs; an HPC runtime
   config may set `device_map_strategy` to `single_device`.
+- `query_generation.single_device.json`: the same pinned model and soft prompt,
+  placing the whole model on one GPU. Used by the reproducible delivery smoke
+  test; sufficient free VRAM is required. It keeps dtype `auto`.
 
 Production configs set `asset_integrity` to `enforce`. Every canonical
 reference/checkpoint path must be declared in `external-assets.yaml`, and the
@@ -22,8 +25,8 @@ Both production model blocks require an explicit `model_path` under `checkpoint/
 The model tree is always verified before local-only loading; `record_only` only
 applies to single-file experimental/synthetic assets. No runtime token or model
 download is required or supported. Framework caches, if needed, stay under `run/`.
-MedGemma remains blocked until an authorized pinned model and trusted tree manifest
-are provided. See `../LOCAL_MODELS.md`.
+Both trusted model manifests are provided. Authorized model weights must be
+materialized separately. See `../LOCAL_MODELS.md`.
 
 Configs must not contain credentials, developer home directories, report data,
 WSI data, or model files.

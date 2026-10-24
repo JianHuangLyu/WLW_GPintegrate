@@ -11,7 +11,9 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import MagicMock, patch
 
-from components.person_a.asset_integrity import ExternalAssetIntegrityError, sha256_file
+from components.person_a.asset_integrity import (
+    ExternalAssetIntegrityError, MANIFEST_PATH, load_external_asset_manifest, sha256_file,
+)
 from components.person_a.hf_snapshot_manifest import build_snapshot_manifest
 from components.person_a.local_model_integrity import verify_local_model
 from components.person_a.learnable_query_generator import (
@@ -19,7 +21,7 @@ from components.person_a.learnable_query_generator import (
     LearnableQueryGenerationError,
 )
 from components.person_a.medgemma_extractor import MedGemmaExtractor
-from contracts.paths import REFERENCE_ROOT, sibling_logical_path
+from contracts.paths import REFERENCE_ROOT, RUN_ROOT, sibling_logical_path
 from contracts.runtime import validate_artifact
 
 
@@ -70,6 +72,25 @@ class LocalModelTests(unittest.TestCase):
         self.assertEqual(self.asset["tree_manifest_sha256"], result["tree_manifest_sha256"])
         self.assertEqual(2, result["file_count"])
         self.assertEqual(64, len(result["tree_sha256"]))
+
+    def test_production_model_configs_have_trusted_pinned_manifests(self) -> None:
+        component = MANIFEST_PATH.parent
+        assets = load_external_asset_manifest()["assets"]
+        report = json.loads((component / "configs/report_decompose.default.json").read_text(encoding="utf-8"))["report_extraction"]["medgemma"]
+        query = json.loads((component / "configs/query_generation.learnable.json").read_text(encoding="utf-8"))["backend"]
+        for config in (report, query):
+            model_id = config.get("model_id", config.get("model_name"))
+            entries = [asset for asset in assets if asset.get("source") == f"huggingface:{model_id}"]
+            self.assertEqual(1, len(entries))
+            entry = entries[0]
+            self.assertEqual(config["model_revision"], entry["revision"])
+            self.assertEqual("/" + config["model_path"].removeprefix("../"), entry["expected_mount_path"])
+            manifest = component / entry["tree_manifest"]
+            self.assertEqual(entry["tree_manifest_sha256"], sha256_file(manifest))
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+            self.assertEqual(model_id, document["model_id"])
+            self.assertEqual(config["model_revision"], document["revision"])
+            self.assertTrue(document["files"])
 
     def test_missing_extra_size_and_same_size_tamper_fail(self) -> None:
         weights = self.root / "model.safetensors"
@@ -140,6 +161,67 @@ class LocalModelTests(unittest.TestCase):
         self.root.rename(hidden)
         with self.assertRaisesRegex(FileNotFoundError, "BLOCKED_MISSING_ASSET"):
             self.verify()
+
+    def test_preparation_uses_fixed_metadata_before_materialization(self) -> None:
+        from components.person_a.prepare_local_models import prepare_local_model
+
+        source = self.directory / "download-source"
+        self.root.rename(source)
+        requested = []
+        original_replace = Path.replace
+
+        def same_filesystem_replace(source_path, destination_path):
+            self.assertEqual(source_path.parent, destination_path.parent)
+            return original_replace(source_path, destination_path)
+
+        def download(model_id, name, **kwargs):
+            self.assertEqual(self.model_id, model_id)
+            self.assertEqual(self.revision, kwargs["revision"])
+            target = Path(kwargs["local_dir"]) / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((source / name).read_bytes())
+            requested.append(name)
+            return target
+
+        with tempfile.TemporaryDirectory(dir=RUN_ROOT) as stage, \
+             patch("components.person_a.prepare_local_models.RUN_ROOT", Path(stage)), \
+             patch.object(Path, "replace", same_filesystem_replace):
+            result = prepare_local_model("synthetic-model", manifest_path=self.manifest_path, downloader=download)
+            self.assertTrue(result["integrity_verified"])
+            self.assertEqual(2, len(requested))
+            self.assertEqual(set(requested), {path.name for path in self.root.iterdir()})
+            self.assertFalse(any(Path(stage).rglob("*.preparing")))
+            # A complete matching directory is reused without network calls.
+            prepare_local_model("synthetic-model", manifest_path=self.manifest_path, downloader=MagicMock(side_effect=AssertionError("unexpected download")))
+
+    def test_preparation_rejects_untrusted_metadata_and_existing_tamper(self) -> None:
+        from components.person_a.prepare_local_models import prepare_local_model
+
+        callback = MagicMock(side_effect=AssertionError("must not download"))
+        (self.root / "config.json").write_text("[]\n", encoding="utf-8")
+        with tempfile.TemporaryDirectory(dir=RUN_ROOT) as stage, \
+             patch("components.person_a.prepare_local_models.RUN_ROOT", Path(stage)):
+            with self.assertRaisesRegex(ExternalAssetIntegrityError, "Existing model file"):
+                prepare_local_model("synthetic-model", manifest_path=self.manifest_path, downloader=callback)
+            self.tree_path.write_text("{}", encoding="utf-8")
+            with self.assertRaisesRegex(ExternalAssetIntegrityError, "manifest SHA-256 mismatch"):
+                prepare_local_model("synthetic-model", manifest_path=self.manifest_path, downloader=callback)
+        callback.assert_not_called()
+
+    def test_preparation_rejects_downloaded_tamper(self) -> None:
+        from components.person_a.prepare_local_models import prepare_local_model
+
+        self.root.rename(self.directory / "old-model")
+
+        def download(model_id, name, **kwargs):
+            target = Path(kwargs["local_dir"]) / name
+            target.write_bytes(b"tampered")
+            return target
+
+        with tempfile.TemporaryDirectory(dir=RUN_ROOT) as stage, \
+             patch("components.person_a.prepare_local_models.RUN_ROOT", Path(stage)):
+            with self.assertRaisesRegex(ExternalAssetIntegrityError, "Downloaded model file"):
+                prepare_local_model("synthetic-model", manifest_path=self.manifest_path, downloader=download)
 
     def test_manifest_schema_sizes_and_digests_are_validated(self) -> None:
         original = deepcopy(self.tree)
