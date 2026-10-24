@@ -1,6 +1,7 @@
 param(
     [string]$Image = 'wlw/person-a:0.9.0-local-models',
     [switch]$SkipBuild,
+    [switch]$CachedBuild,
     [switch]$PrepareModels
 )
 
@@ -16,6 +17,7 @@ $results = [ordered]@{ status = 'running'; image = $Image; started = (Get-Date).
 $results.repo_head = (& git -C $repoRoot rev-parse HEAD | Out-String).Trim()
 $results.prepare_models = [bool]$PrepareModels
 $results.build_skipped = [bool]$SkipBuild
+$results.build_mode = if ($SkipBuild) { 'skipped' } elseif ($CachedBuild) { 'cached' } else { 'clean' }
 
 function Invoke-DockerCheck {
     param([string]$Name, [string[]]$DockerArgs)
@@ -33,21 +35,48 @@ function Invoke-DockerCheck {
 }
 
 try {
+    if ($SkipBuild -and $CachedBuild) { throw 'Choose either SkipBuild or CachedBuild, not both' }
     Invoke-DockerCheck -Name 'engine' -DockerArgs @('version')
     if (-not $SkipBuild) {
-        Invoke-DockerCheck -Name 'clean-build' -DockerArgs @('build', '--no-cache', '--progress', 'plain', '-f', (Join-Path $PSScriptRoot 'Dockerfile'), '-t', $Image, $repoRoot)
+        $buildArgs = @('build', '--progress', 'plain')
+        $buildName = 'cached-build'
+        if (-not $CachedBuild) {
+            $buildArgs += '--no-cache'
+            $buildName = 'clean-build'
+        }
+        Invoke-DockerCheck -Name $buildName -DockerArgs ($buildArgs + @('-f', (Join-Path $PSScriptRoot 'Dockerfile'), '-t', $Image, $repoRoot))
     }
     Invoke-DockerCheck -Name 'image-identity' -DockerArgs @('image', 'inspect', '--format', '{{.Id}}', $Image)
+    # Verify image runtime bytes before tests mount the checkout over /app.
+    # Host-only harness/docs edits do not require refreshing the runtime image.
+    $sourceDigests = [ordered]@{}
+    foreach ($directory in @('contracts', 'components/person_a')) {
+        foreach ($file in (Get-ChildItem -LiteralPath (Join-Path $repoRoot $directory) -File -Recurse)) {
+            if ($file.Extension -in @('.py', '.json', '.yaml', '.yml', '.txt') -or $file.Name -eq 'Dockerfile') {
+                $relative = $file.FullName.Substring($repoRoot.Length + 1).Replace('\', '/')
+                $sourceDigests[$relative] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+        }
+    }
+    [System.IO.File]::WriteAllText((Join-Path $validationRoot 'runtime-source.json'), ($sourceDigests | ConvertTo-Json -Depth 3), $utf8)
     $imageCheck = @'
+import hashlib
+import json
 from pathlib import Path
 root=Path('/app')
+expected=json.loads(Path('/validation/runtime-source.json').read_text())
+for relative,digest in expected.items():
+    source=root/relative
+    assert source.is_file(), f'Image runtime source missing: {relative}'
+    assert hashlib.sha256(source.read_bytes()).hexdigest()==digest, f'Stale image runtime source: {relative}; rebuild the image'
 for pattern in ('__pycache__','*.pyc','*.pyo','*.pt','*.safetensors','.env'):
     found=list(root.rglob(pattern))
     assert not found, f'Unexpected image content matching {pattern}: {found}'
 assert not Path('/reference/person_a').exists(), 'Reference assets must remain external'
 print('Image source tree contains no model weights, credentials file or Python cache')
+print('Image runtime source fingerprints match the checkout')
 '@
-    Invoke-DockerCheck -Name 'image-content' -DockerArgs @('run', '--rm', '--network', 'none', '--entrypoint', 'python', $Image, '-c', $imageCheck)
+    Invoke-DockerCheck -Name 'image-content' -DockerArgs @('run', '--rm', '--network', 'none', '-v', "${validationRoot}:/validation:ro", '--entrypoint', 'python', $Image, '-c', $imageCheck)
 
     # Full-repository tests also exercise Person E and the example pipeline.
     # Copy their two small fixture JSONs, never a Person E model/checkpoint.

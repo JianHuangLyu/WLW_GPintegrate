@@ -32,3 +32,8 @@ Gemma uses the explicit `query_generation.single_device.json` profile, requiring
 enough free VRAM for the whole model. The existing CPU-offload profile remains
 available for other hardware. `-SkipBuild` explicitly reuses an existing image;
 such a run does not establish a clean build result.
+
+Use `-CachedBuild` after runtime source edits to reuse unchanged dependency
+layers; use `-SkipBuild` only when image runtime files still match the checkout.
+The harness verifies those source fingerprints before running tests. The default
+remains a clean build; cached/skip modes are recorded explicitly.

@@ -408,6 +408,40 @@ class LocalModelTests(unittest.TestCase):
                         transformers.AutoTokenizer, transformers.AutoModelForCausalLM):
             factory.from_pretrained.assert_not_called()
 
+    def test_medgemma_chat_tokens_and_snapshot_stop_tokens_are_preserved(self) -> None:
+        from contextlib import nullcontext
+
+        class Batch(dict):
+            def to(self, device):
+                return self
+
+        class Sequence:
+            shape = (1, 6)
+
+            def __getitem__(self, index):
+                if isinstance(index, int):
+                    return self
+                return SimpleNamespace(tolist=lambda: [12, 13, 106])
+
+        tokenizer = MagicMock(eos_token_id=1, pad_token_id=1)
+        tokenizer.apply_chat_template.return_value = "<bos><start_of_turn>user\nSynthetic report<end_of_turn>"
+        tokenizer.return_value = Batch(input_ids=SimpleNamespace(shape=(1, 3)))
+        tokenizer.decode.return_value = '{"Histologic_Type":"Atypical ductal hyperplasia"}'
+        loader = self.medgemma()
+        loader.processor = SimpleNamespace(tokenizer=tokenizer)
+        loader.model = SimpleNamespace(
+            device="cpu", hf_device_map={},
+            generation_config=SimpleNamespace(eos_token_id=[1, 106]),
+            generate=MagicMock(return_value=Sequence()),
+        )
+        with patch.object(loader, "_load"), patch.dict("sys.modules", {"torch": SimpleNamespace(inference_mode=nullcontext)}):
+            self.assertEqual({"Histologic_Type": "Atypical ductal hyperplasia"}, loader.extract("Synthetic report", ["Histologic_Type"]))
+        self.assertFalse(tokenizer.call_args.kwargs["add_special_tokens"])
+        # Omitting an override lets GenerationMixin use both snapshot stop IDs.
+        self.assertNotIn("eos_token_id", loader.model.generate.call_args.kwargs)
+        self.assertEqual([1, 106], loader.model.generation_config.eos_token_id)
+        self.assertEqual([12, 13, 106], loader.last_generation_token_ids)
+
     def test_soft_prompt_model_identity_and_revision_checks_remain(self) -> None:
         torch, transformers = self.fake_modules()
         generator = self.gemma()

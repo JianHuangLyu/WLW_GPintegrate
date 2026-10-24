@@ -239,6 +239,8 @@ class MedGemmaExtractor:
         )
         encoded = tokenizer(
             prompt_text,
+            # The chat template already inserts BOS and turn markers.
+            add_special_tokens=False,
             return_tensors="pt",
             truncation=True,
             max_length=self.max_input_tokens,
@@ -255,7 +257,7 @@ class MedGemmaExtractor:
                 **encoded,
                 max_new_tokens=self.max_new_tokens,
                 do_sample=False,
-                eos_token_id=tokenizer.eos_token_id,
+                # Preserve the snapshot's EOS list, including end-of-turn.
                 pad_token_id=tokenizer.pad_token_id,
                 return_dict_in_generate=self.capture_generation_diagnostics,
                 output_logits=self.capture_generation_diagnostics,

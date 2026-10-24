@@ -155,3 +155,18 @@ SHA-verified reference vocabulary. Restricted source text is written only to
 whitespace token counts. This establishes model execution, not retrieval quality
 or generalization accuracy. Public generic F fixtures are for contract checks;
 model-generated malformed JSON is rejected rather than repaired.
+
+### Reusing a previously built environment
+
+After Python/config changes, use `-CachedBuild` to rebuild the image while reusing
+unchanged dependency layers. Use `-SkipBuild` only when the runtime bytes have not
+changed. The harness compares SHA-256 of image Python/config/schema/manifest files
+with the checkout before running tests, so a stale image fails immediately.
+The default still uses `--no-cache`; cached builds are recorded separately and
+are not reported as a new clean build.
+
+MedGemma tokenization passes `add_special_tokens=False` after applying its chat
+template, as required by the [Transformers chat-template guide](https://huggingface.co/docs/transformers/chat_templating).
+Generation retains the pinned snapshot's EOS list (`1` and `106`) rather than
+overriding it with the tokenizer's single EOS. Report prompts, fixed input/model
+revision, diagnostic mapping and acceptance expectations remain unchanged.
