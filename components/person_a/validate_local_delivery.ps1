@@ -37,6 +37,16 @@ try {
         Invoke-DockerCheck -Name 'clean-build' -DockerArgs @('build', '--no-cache', '--progress', 'plain', '-f', (Join-Path $PSScriptRoot 'Dockerfile'), '-t', $Image, $repoRoot)
     }
     Invoke-DockerCheck -Name 'image-identity' -DockerArgs @('image', 'inspect', '--format', '{{.Id}}', $Image)
+    $imageCheck = @'
+from pathlib import Path
+root=Path('/app')
+for pattern in ('__pycache__','*.pyc','*.pyo','*.pt','*.safetensors','.env'):
+    found=list(root.rglob(pattern))
+    assert not found, f'Unexpected image content matching {pattern}: {found}'
+assert not Path('/reference/person_a').exists(), 'Reference assets must remain external'
+print('Image source tree contains no model weights, credentials file or Python cache')
+'@
+    Invoke-DockerCheck -Name 'image-content' -DockerArgs @('run', '--rm', '--network', 'none', '--entrypoint', 'python', $Image, '-c', $imageCheck)
 
     # Unit tests get an isolated writable copy of only the six small assets.
     # Production inference below mounts the real reference tree read-only.
