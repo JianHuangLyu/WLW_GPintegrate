@@ -11,11 +11,11 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 import json
-import os
 from pathlib import Path
 from typing import Any
 
 from components.person_a.asset_integrity import verify_external_asset
+from components.person_a.local_model_integrity import verify_local_model
 from contracts.paths import resolve_person_reference_path
 
 SOFT_PROMPT_MARKER = "<SOFT_PROMPT_INSERT>"
@@ -235,6 +235,7 @@ class LearnableSoftPromptGenerator:
         self.config = deepcopy(config)
         self.model_name = str(config["model_name"])
         self.model_revision = config.get("model_revision") or None
+        self.model_path = resolve_person_reference_path("person_a", config["model_path"])
         self.checkpoint_path = resolve_person_reference_path(
             "person_a", config["checkpoint_path"]
         )
@@ -247,7 +248,6 @@ class LearnableSoftPromptGenerator:
         self.max_new_tokens = int(config.get("max_new_tokens", 768))
         self.require_cuda = bool(config.get("require_cuda", True))
         self.dtype_name = str(config.get("dtype", "auto"))
-        self.token_env = str(config.get("token_env", "HF_TOKEN"))
         self.device_map_strategy = str(
             config.get("device_map_strategy", "single_device")
         )
@@ -285,6 +285,7 @@ class LearnableSoftPromptGenerator:
         self.provenance = {
             "backend": "learnable_soft_prompt",
             "model_name": self.model_name,
+            "model_id": self.model_name,
             "model_revision": self.model_revision,
             "checkpoint_name": self.checkpoint_path.name,
             "checkpoint_sha256": checkpoint_integrity["sha256"],
@@ -322,6 +323,9 @@ class LearnableSoftPromptGenerator:
     def _load(self) -> None:
         if self._model is not None:
             return
+        integrity = verify_local_model(
+            self.model_path, model_id=self.model_name, revision=self.model_revision,
+        )
         try:
             import torch
             from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -337,14 +341,8 @@ class LearnableSoftPromptGenerator:
             )
         device = "cuda" if cuda_available else "cpu"
         dtype = self._dtype(torch, device)
-        token = os.environ.get(self.token_env)
-        common: dict[str, Any] = {}
-        if self.model_revision:
-            common["revision"] = self.model_revision
-        if token:
-            common["token"] = token
-
-        tokenizer = AutoTokenizer.from_pretrained(self.model_name, **common)
+        common: dict[str, Any] = {"local_files_only": True}
+        tokenizer = AutoTokenizer.from_pretrained(str(self.model_path), **common)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
         model_kwargs: dict[str, Any] = {
@@ -368,12 +366,12 @@ class LearnableSoftPromptGenerator:
                 }
             )
             model = AutoModelForCausalLM.from_pretrained(
-                self.model_name,
+                str(self.model_path),
                 **model_kwargs,
             )
         else:
             model = AutoModelForCausalLM.from_pretrained(
-                self.model_name,
+                str(self.model_path),
                 **model_kwargs,
             ).to(device)
         model.config.use_cache = True
@@ -396,6 +394,11 @@ class LearnableSoftPromptGenerator:
             raise LearnableQueryGenerationError(
                 f"Checkpoint model {checkpoint_model!r} does not match "
                 f"configured model {self.model_name!r}"
+            )
+        checkpoint_revision = checkpoint.get("model_revision")
+        if checkpoint_revision and checkpoint_revision != self.model_revision:
+            raise LearnableQueryGenerationError(
+                "Checkpoint model revision does not match the verified local model"
             )
         if checkpoint.get("target_format") != TARGET_FORMAT:
             raise LearnableQueryGenerationError(
@@ -443,6 +446,7 @@ class LearnableSoftPromptGenerator:
 
         self.provenance.update(
             {
+                "model_integrity": integrity,
                 "checkpoint_run_name": checkpoint.get("run_name"),
                 "checkpoint_epoch": checkpoint.get("current_epoch"),
                 "soft_prompt_len": soft_prompt_len,

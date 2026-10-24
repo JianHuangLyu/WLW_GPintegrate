@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from functools import lru_cache
 import hashlib
 import hmac
 from pathlib import Path
@@ -29,8 +28,7 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-@lru_cache(maxsize=None)
-def _load_manifest_cached(manifest_path: str) -> dict[str, Any]:
+def _load_manifest(manifest_path: str) -> dict[str, Any]:
     path = Path(manifest_path)
     document = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(document, dict) or not isinstance(document.get("assets"), list):
@@ -45,7 +43,9 @@ def load_external_asset_manifest(
 ) -> dict[str, Any]:
     """Load the versioned external-asset manifest."""
 
-    return _load_manifest_cached(str(Path(manifest_path).resolve()))
+    # A deployment may replace this file while a long-lived process is active.
+    # Re-read it on every verification instead of retaining stale expectations.
+    return _load_manifest(str(Path(manifest_path).resolve()))
 
 
 def _mounted_path(path: Path) -> str:

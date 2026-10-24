@@ -12,7 +12,6 @@
     "medgemma": {
       "model_id": "google/medgemma-1.5-4b-it",
       "model_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
-      "token_env": "HF_TOKEN",
       "require_cuda": true,
       "load_in_4bit": true,
       "enable_cpu_offload": true,
@@ -21,7 +20,8 @@
       "chunk_chars": 3000,
       "overlap": 300,
       "max_input_tokens": 2048,
-      "max_new_tokens": 512
+      "max_new_tokens": 512,
+      "model_path": "../reference/person_a/checkpoint/medgemma-1.5-4b-it"
     }
   }
 }

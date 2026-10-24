@@ -223,7 +223,9 @@ def build_artifact(
         "payload": {
             "data_mode": "inference",
             "DxItem_list": list(requested),
-            "reference_versions": {"dx_candidates": candidate_provenance},
+            "reference_versions": {
+                "dx_candidates": candidate_provenance, **extraction.provenance,
+            },
             "case_list": [case],
         },
     }

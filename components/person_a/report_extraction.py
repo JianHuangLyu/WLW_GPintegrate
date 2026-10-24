@@ -309,6 +309,7 @@ class ReportExtractionEngine:
         )
         self._catalog_by_key = {_key(name): name for name in catalog}
         self._medgemma: Any | None = None
+        self.provenance: dict[str, Any] = {}
         self._audit_context: dict[str, str] = {}
 
         configured_names = self.config.get("item_name_map", {})
@@ -356,6 +357,9 @@ class ReportExtractionEngine:
         before = getattr(self._medgemma, "generation_count", 0)
         self._audit("medgemma_start", items=requested)
         result = self._medgemma.extract(report_text, requested)
+        model_provenance = getattr(self._medgemma, "provenance", None)
+        if model_provenance:
+            self.provenance["medgemma_report_extraction"] = model_provenance
         self._audit(
             "medgemma_complete", items=requested,
             nonempty_items=[key for key, value in result.items() if value],

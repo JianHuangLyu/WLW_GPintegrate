@@ -18,6 +18,6 @@
     "device_map_strategy": "auto_cpu_offload",
     "gpu_memory_limit": "1200MiB",
     "cpu_memory_limit": "12GiB",
-    "token_env": "HF_TOKEN"
+    "model_path": "../reference/person_a/checkpoint/gemma-3-1b-it"
   }
 }

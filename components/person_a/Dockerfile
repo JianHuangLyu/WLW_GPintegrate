@@ -5,6 +5,8 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     HF_HOME=/run/cache/huggingface \
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
     TOKENIZERS_PARALLELISM=false \
     PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 

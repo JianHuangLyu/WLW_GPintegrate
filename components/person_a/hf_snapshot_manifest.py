@@ -4,11 +4,48 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
+import stat
 from typing import Any
 
 from components.person_a.asset_integrity import sha256_file
 from contracts.paths import resolve_run_path
+
+
+def model_tree_files(root: Path) -> dict[str, Path]:
+    """List regular files, rejecting escapes and directory links/cycles.
+
+    Contained file symlinks are allowed. HF cache links to blobs outside the
+    snapshot must first be materialized into a self-contained model directory.
+    """
+    root = root.resolve(strict=True)
+    if not root.is_dir():
+        raise ValueError(f"Model root is not a directory: {root}")
+    files: dict[str, Path] = {}
+
+    def walk_error(error: OSError) -> None:
+        raise error
+
+    for directory, dirs, names in os.walk(root, followlinks=False, onerror=walk_error):
+        for name in sorted(dirs + names):
+            path = Path(directory) / name
+            try:
+                resolved = path.resolve(strict=True)
+                resolved.relative_to(root)
+            except (ValueError, OSError, RuntimeError) as exc:
+                raise ValueError(f"Model path escapes root or is invalid: {path}") from exc
+            if name in dirs:
+                reparse = getattr(path.lstat(), "st_file_attributes", 0) & getattr(
+                    stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0
+                )
+                if path.is_symlink() or reparse:
+                    raise ValueError(f"Model directory symlinks/junctions are not allowed: {path}")
+                continue
+            if not stat.S_ISREG(resolved.stat().st_mode):
+                raise ValueError(f"Model path is not a regular file: {path}")
+            files[path.relative_to(root).as_posix()] = resolved
+    return dict(sorted(files.items()))
 
 
 def build_snapshot_manifest(
@@ -27,12 +64,10 @@ def build_snapshot_manifest(
         )
 
     files: list[dict[str, Any]] = []
-    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
-        if not path.is_file():
-            continue
+    for relative, path in model_tree_files(root).items():
         files.append(
             {
-                "path": path.relative_to(root).as_posix(),
+                "path": relative,
                 "size": path.stat().st_size,
                 "sha256": sha256_file(path),
             }

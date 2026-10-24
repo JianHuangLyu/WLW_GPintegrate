@@ -80,6 +80,22 @@ class PersonAAssetIntegrityTests(unittest.TestCase):
             self.assertFalse(provenance["integrity_verified"])
             self.assertEqual("record_only", provenance["integrity_mode"])
 
+    def test_manifest_update_is_visible_in_same_process(self) -> None:
+        parent = REFERENCE_ROOT / "person_a"
+        parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=parent) as temp_dir:
+            directory = Path(temp_dir)
+            asset = directory / "asset.json"
+            manifest = directory / "external-assets.yaml"
+            asset.write_text('{"version": 1}', encoding="utf-8")
+            manifest.write_text(json.dumps(self._manifest(asset, sha256_file(asset))), encoding="utf-8")
+            old = verify_external_asset(asset, manifest_path=manifest)
+            asset.write_text('{"version": 2}', encoding="utf-8")
+            manifest.write_text(json.dumps(self._manifest(asset, sha256_file(asset))), encoding="utf-8")
+            new = verify_external_asset(asset, manifest_path=manifest)
+            self.assertTrue(new["integrity_verified"])
+            self.assertNotEqual(old["sha256"], new["sha256"])
+
 
 if __name__ == "__main__":
     unittest.main()

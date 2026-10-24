@@ -27,7 +27,9 @@ conditions is rejected before G is written.
 
 ```text
 reference/person_a/
-├── checkpoint/soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt
+├── checkpoint/
+│   ├── gemma-3-1b-it/                 # all seven files from the pinned tree manifest
+│   └── soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt
 └── template_ref/
     ├── Histologic_Type_mappingTable.json
     ├── candidateReference.json
@@ -35,9 +37,13 @@ reference/person_a/
     └── chunks_with_attribute_condition.json
 ```
 
-Mount `reference/` at `/reference:ro`; use `run/cache/huggingface` as the
-Hugging Face cache and provide `HF_TOKEN` through the environment. Asset hashes
-and revisions are declared in `external-assets.yaml`.
+Mount `reference/` at `/reference:ro`. The configured `model_path` is
+`../reference/person_a/checkpoint/gemma-3-1b-it`; identity remains
+`google/gemma-3-1b-it`, revision `dcc83ea841ab6100d6b47a070329e1ba4cf78752`.
+The loader checks the fixed manifest and every model file before local-only
+loading. No HF token, cache reconstruction, or network is needed. G records
+verification under `reference_versions.learnable_query_generation.model_integrity`.
+See [LOCAL_MODELS.md](LOCAL_MODELS.md) for the exact preparation policy.
 
 Person B only needs to provide schema-valid F chunks containing `dx_pair_id`,
 `chunk_id`, and non-empty `text`. Person A does not import Person B code.
@@ -74,8 +80,7 @@ The image defaults to Report Decompose, so Query Generation overrides the
 entrypoint:
 
 ```bash
-docker run --rm --gpus all \
-  --env-file integration/.env \
+docker run --rm --gpus all --network none \
   -v "$(pwd)/../reference:/reference:ro" \
   -v "$(pwd)/../run:/run" \
   --entrypoint python \
@@ -89,10 +94,13 @@ docker run --rm --gpus all \
 
 `query_generation.learnable.json` limits GPU placement and offloads remaining
 BF16 layers to host RAM for low-memory GPUs. On an HPC GPU with sufficient VRAM,
-set `device_map_strategy` to `single_device` in an external runtime config.
+set `device_map_strategy` to `single_device` in a config under
+`components/person_a/configs/`. Host RAM budget is 16 GB including up to 12 GiB
+CPU offload and overhead; hardware minima remain unverified.
 
 ## Acceptance checks
 
+- Local model files match the fixed tree manifest before any Transformers load.
 - D and F pass their schemas and share `case_id`.
 - Each mapped Histologic Type has at least three matching F chunks.
 - F has unique chunk IDs and unique retrieval ranks per DxPair, with no foreign

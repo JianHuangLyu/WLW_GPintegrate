@@ -48,6 +48,20 @@ class HuggingFaceSnapshotManifestTests(unittest.TestCase):
                     revision="expected-revision",
                 )
 
+    def test_export_rejects_symlink_escape(self) -> None:
+        with tempfile.TemporaryDirectory(dir=RUN_ROOT) as temp_dir:
+            parent = Path(temp_dir)
+            root = parent / "abc123"
+            root.mkdir()
+            outside = parent / "outside.bin"
+            outside.write_bytes(b"outside")
+            try:
+                (root / "weights.bin").symlink_to(outside)
+            except OSError as exc:
+                self.skipTest(f"OS does not permit symlink creation: {exc}")
+            with self.assertRaisesRegex(ValueError, "escapes root"):
+                build_snapshot_manifest(root, model_id="test/model", revision="abc123")
+
 
 if __name__ == "__main__":
     unittest.main()

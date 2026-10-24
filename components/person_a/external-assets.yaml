@@ -39,12 +39,17 @@ assets:
     sha256: null
     license: google-health-ai-developer-foundations
     source: huggingface:google/medgemma-1.5-4b-it
-    expected_cache_path: /run/cache/huggingface
-    note: Multi-file Hub snapshot is pinned by revision; record a deployment export manifest when mirrored offline.
+    expected_mount_path: /reference/person_a/checkpoint/medgemma-1.5-4b-it
+    tree_manifest: null
+    tree_manifest_sha256: null
+    delivery_status: BLOCKED_MISSING_ASSET
+    note: Authorized pinned snapshot and independently reviewed fixed tree manifest are still required. Runtime refuses loading until both are supplied.
   - name: gemma-query-generator
     revision: dcc83ea841ab6100d6b47a070329e1ba4cf78752
     sha256: null
     license: gemma
     source: huggingface:google/gemma-3-1b-it
-    expected_cache_path: /run/cache/huggingface
-    note: Exact Hub revision used by the successful mounted Person B condition-generation validation.
+    expected_mount_path: /reference/person_a/checkpoint/gemma-3-1b-it
+    tree_manifest: model-manifests/gemma-3-1b-it-dcc83ea.snapshot.json
+    tree_manifest_sha256: 0925391b778e16eed1025e8c8581905f4c51a62022e49337aef4dcad2056d0b0
+    note: Seven materialized files from the pinned handoff snapshot; metadata only is versioned here. Model weights remain external.

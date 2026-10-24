@@ -73,7 +73,7 @@ def main() -> None:
     parser.add_argument(
         "--load-model",
         action="store_true",
-        help="also download/load MedGemma and perform one short generation",
+        help="also verify/load local MedGemma and perform one short generation",
     )
     parser.add_argument(
         "--config",
@@ -100,6 +100,7 @@ def main() -> None:
             "Histologic Type: invasive carcinoma of no special type.",
             ["Histologic_Type"],
         )
+        result["model_integrity"] = extractor.provenance
         result["generation_diagnostics"] = {
             "input_tokens": extractor.last_input_length,
             "output_tokens": extractor.last_output_length,

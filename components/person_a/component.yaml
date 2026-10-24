@@ -6,18 +6,25 @@ outputs: [D.DxPairs@2.0, G.VisualAttributeQueries@2.0]
 runtime:
   python: "3.11"
   cpu: 2
-  memory_gb: 4
+  memory_gb: 16
+  memory_note: Planning budget including up to 12GiB Gemma CPU offload plus overhead; not a certified minimum.
   gpu: true
   gpu_count: 1
   gpu_vram_gb: 4
+  gpu_vram_note: Existing low-memory placement profile; minimum hardware requirements remain unverified.
   cuda: "12.4"
   torch: "2.6.0+cu124"
   transformers: "5.16.1"
   model_id: google/medgemma-1.5-4b-it
   model_revision: 91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b
   quantization: bitsandbytes-nf4-4bit
-  model_cache_mount: /run/cache/huggingface
+  model_mount: /reference/person_a/checkpoint/medgemma-1.5-4b-it
+  model_delivery_status: BLOCKED_MISSING_ASSET
+  local_files_only: true
+  model_integrity: fixed-tree-manifest-before-load
   query_generation_model_id: google/gemma-3-1b-it
+  query_generation_model_revision: dcc83ea841ab6100d6b47a070329e1ba4cf78752
+  query_generation_model_mount: /reference/person_a/checkpoint/gemma-3-1b-it
   query_generation_checkpoint_mount: /reference/person_a/checkpoint/soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt
   query_generation_attribute_reference_mount: /reference/person_a/template_ref/chunks_with_attribute_condition.json
 entrypoints:

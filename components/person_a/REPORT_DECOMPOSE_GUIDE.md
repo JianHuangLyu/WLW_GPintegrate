@@ -24,13 +24,28 @@ state Histologic Type is valid and does not emit that DxItem.
 ```text
 lab_20/
 ├── WLW_GPintegrate/                  # repository and image build context
-├── reference/person_a/template_ref/ # read-only candidates/mappings
+├── reference/person_a/               # read-only assets
+│   ├── checkpoint/medgemma-1.5-4b-it/ # authorized, pinned local model
+│   └── template_ref/                 # candidates/mappings
 └── run/                              # inputs, outputs, cache, logs
 ```
 
 Reports and WSI files remain outside Git and the image. Mount them read-only,
 for example at `/data/reports`. The B manifest points to mounted table files;
 CaseList stains contain the corresponding container-visible WSI paths.
+
+The MedGemma config uses local `model_path`
+`../reference/person_a/checkpoint/medgemma-1.5-4b-it`, identity
+`google/medgemma-1.5-4b-it`, revision `91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b`.
+Loading requires a reviewed fixed tree manifest and exact file verification;
+`from_pretrained` is local-only and needs no runtime token. Successful
+model-invoked D records `reference_versions.medgemma_report_extraction`.
+
+MedGemma is currently `BLOCKED_MISSING_ASSET`: the authorized pinned model
+and trusted tree manifest are absent. Its real CGMH inference remains untested
+until both are supplied. No different revision or online fallback is used.
+VGHTC Regex and canonical examples do not load this model. Preparation details
+are in [LOCAL_MODELS.md](LOCAL_MODELS.md).
 
 ## Run
 
@@ -65,8 +80,7 @@ python -m components.person_a.report_decompose \
 ## Docker on Windows PowerShell
 
 ```powershell
-docker run --rm --gpus all `
-  --env-file "integration/.env" `
+docker run --rm --gpus all --network none `
   -v "C:/lab_20/reference:/reference:ro" `
   -v "C:/lab_20/run:/run" `
   -v "D:/hospital-data:/data/reports:ro" `
@@ -84,6 +98,8 @@ PowerShell backtick. D is written to the host `run/` mount.
 - CaseList input passes `case_list_input.schema.json` and contains one case at
   the Report Decompose boundary.
 - D passes `D_dx_pairs.schema.json`.
+- Before MedGemma loads, local files pass the trusted manifest, revision, size,
+  SHA-256 and containment checks; missing assets fail closed.
 - Case, block, stain, WSI identity, and filepaths are preserved.
 - `referenceBlock`, `referenceType`, and `referenceWSI` match the selected stains.
 - Invalid input, reference, or model failures exit non-zero without a partial D.

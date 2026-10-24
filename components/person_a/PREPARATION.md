@@ -187,7 +187,7 @@ Canonical schemas：
 
 ```text
 WLW_GPintegrate/components/person_a/       # 程式、Dockerfile、requirements、文件、非敏感 config
-reference/person_a/checkpoint/             # 模型或權重；若沒有模型則可不建立
+reference/person_a/checkpoint/             # 正式 MedGemma／Gemma 本地模型目錄與 soft prompt
 reference/person_a/template_ref/           # 診斷候選、mapping、vocabulary 等外部參考
 run/input/                                 # CaseList、D、F
 run/output/                                # D、G、暫存與測試產物
@@ -198,6 +198,17 @@ run/output/                                # D、G、暫存與測試產物
 - 模型、reference table、院端資料與 credential 不得進 Git 或 image。
 - 外部資產須在 `external-assets.yaml` 列出名稱、revision、SHA-256、授權與預期 mount path。
 - 正式 config 使用 `asset_integrity: enforce`；路徑未宣告或 SHA-256 不符時必須停止。
+- 正式模型路徑固定為 `checkpoint/gemma-3-1b-it/` 與 `checkpoint/medgemma-1.5-4b-it/`；
+  來源 ID、revision、預期 mount path 與可信 tree manifest 記錄在 `external-assets.yaml`。
+- 模型載入前必須核對固定 manifest 的 SHA、model ID／revision、完整檔案清單、size、SHA-256；
+  symlink 或相對路徑不得逃出模型 root。manifest 每次驗證重新讀取，不沿用舊快取。
+- 模型使用 `from_pretrained(model_path, local_files_only=True)`；本地推論不要求 HF token，
+  也不下載或回退線上 ID。`record_only` 不會停用模型完整性驗證。
+- D/G 的 `reference_versions` 保存實際模型驗證結果；沒有呼叫模型時不宣稱已驗證模型。
+- MedGemma 的授權固定 snapshot 與可信 manifest 尚缺，標記 `BLOCKED_MISSING_ASSET`；
+  正式 CGMH model-invoked 路徑待資產齊備另驗收。準備步驟見 `LOCAL_MODELS.md`。
+- RAM 規劃 16 GB（Gemma CPU offload 可用至 12 GiB，另留 overhead），不是已驗證最低需求；
+  4 GB VRAM 也不是兩個模型共同的已認證最低規格。
 - runtime 只寫入 sibling `run/`；不得在 component 或 `reference/` 下產生 cache。
 
 ## 4. Unified CLI

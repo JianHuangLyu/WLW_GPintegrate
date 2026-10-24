@@ -2,16 +2,18 @@
 
 Imports are intentionally lazy so the standard-library regex/demo path remains
 lightweight.  A server selecting this backend must provide a compatible
-PyTorch/Transformers environment, GPU and Hugging Face credentials.
+PyTorch/Transformers environment, GPU and verified local model files.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 from typing import Any
+
+from components.person_a.local_model_integrity import verify_local_model
+from contracts.paths import resolve_person_reference_path
 
 
 def _clean(value: Any) -> str:
@@ -68,7 +70,8 @@ class MedGemmaExtractor:
         self.config = config or {}
         self.model_id = self.config.get("model_id", "google/medgemma-1.5-4b-it")
         self.model_revision = self.config.get("model_revision")
-        self.token_env = self.config.get("token_env", "HF_TOKEN")
+        self.model_path = resolve_person_reference_path("person_a", self.config["model_path"])
+        self.provenance: dict[str, Any] = {}
         self.chunk_chars = int(self.config.get("chunk_chars", 6500))
         self.overlap = int(self.config.get("overlap", 700))
         self.max_input_tokens = int(self.config.get("max_input_tokens", 4096))
@@ -125,6 +128,9 @@ class MedGemmaExtractor:
     def _load(self) -> None:
         if self.model is not None:
             return
+        integrity = verify_local_model(
+            self.model_path, model_id=self.model_id, revision=self.model_revision,
+        )
         try:
             import torch
             from transformers import (
@@ -143,14 +149,6 @@ class MedGemmaExtractor:
                 "MedGemma backend requires CUDA, but PyTorch cannot see a GPU. "
                 "Run the Person A container with GPU access (for example, "
                 "docker run --gpus all)."
-            )
-
-        token = os.environ.get(self.token_env, "").strip()
-        if not token:
-            raise RuntimeError(
-                f"MedGemma backend requires environment variable {self.token_env}; "
-                "use a Hugging Face read token whose account accepted the "
-                "MedGemma terms"
             )
 
         dtype = self._torch_dtype(torch)
@@ -192,13 +190,12 @@ class MedGemmaExtractor:
             )
 
         self.processor = AutoProcessor.from_pretrained(
-            self.model_id, revision=self.model_revision, token=token
+            str(self.model_path), local_files_only=True
         )
         self.processor.tokenizer.pad_token = self.processor.tokenizer.eos_token
         self.model = AutoModelForImageTextToText.from_pretrained(
-            self.model_id,
-            revision=self.model_revision,
-            token=token,
+            str(self.model_path),
+            local_files_only=True,
             quantization_config=quantization,
             device_map=device_map,
             dtype=dtype,
@@ -206,11 +203,12 @@ class MedGemmaExtractor:
         )
         self.model.config.pad_token_id = self.processor.tokenizer.pad_token_id
         self.model.eval()
+        self.provenance = integrity
         logging.getLogger(__name__).info(json.dumps({
             "event": "medgemma_loaded",
             "model_id": self.model_id,
             "configured_revision": self.model_revision,
-            "resolved_revision": getattr(self.model.config, "_commit_hash", None),
+            "model_integrity": self.provenance,
             "quantization": "bitsandbytes-nf4-4bit" if self.load_in_4bit else "none",
             "compute_dtype": str(dtype),
             "cuda_available": torch.cuda.is_available(),

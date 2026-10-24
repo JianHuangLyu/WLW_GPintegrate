@@ -28,6 +28,12 @@ class FakeLearnableGenerator:
             "backend": "learnable_soft_prompt",
             "model_name": "google/gemma-3-1b-it",
             "model_revision": None,
+            "model_integrity": {
+                "model_id": "google/gemma-3-1b-it",
+                "model_revision": "synthetic-revision",
+                "tree_sha256": "a" * 64,
+                "integrity_verified": True,
+            },
             "checkpoint_name": "soft_prompt_condition_best.pt",
             "checkpoint_sha256": "abc123",
             "attribute_reference": {
@@ -305,6 +311,7 @@ class LearnableQueryGenerationTest(unittest.TestCase):
         selection = artifact["payload"]["reference_versions"][
             "learnable_query_generation"
         ]
+        self.assertEqual(generator.provenance["model_integrity"], selection["model_integrity"])
         self.assertEqual(
             "ascending_retrieval_rank_top_n",
             selection["chunk_selection_rule"],

@@ -36,7 +36,10 @@ External files are not committed or copied into the image:
 
 ```text
 reference/person_a/
-├── checkpoint/soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt
+├── checkpoint/
+│   ├── gemma-3-1b-it/                 # complete materialized model directory
+│   ├── medgemma-1.5-4b-it/            # authorized pinned snapshot still required
+│   └── soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt
 └── template_ref/
     ├── DxStructuredCandidates_integrated.json
     ├── Histologic_Type_mappingTable.json
@@ -45,23 +48,34 @@ reference/person_a/
     └── chunks_with_attribute_condition.json
 ```
 
-`external-assets.yaml` records their expected paths and SHA-256 values. Mount
-the sibling `reference/` directory read-only at `/reference` and the sibling
-`run/` directory read-write at `/run`. Set `HF_TOKEN` at runtime; do not store it
-in a config file. Production configs enforce the manifest: undeclared paths or
-SHA-256 mismatches fail before model loading. Synthetic tests explicitly use
-record-only integrity mode.
+`external-assets.yaml` declares six fixed single-file assets and two local model
+trees. Model metadata (paths, sizes, SHA-256) is versioned with the code; the
+weights remain external. Production configs specify `model_path` under
+`../reference/person_a/checkpoint/`. Both loaders verify the fixed model tree
+before calling `from_pretrained(local_path, local_files_only=True)`.
 
-For an offline Hugging Face mirror, export every snapshot file's size and
-SHA-256 from the pinned revision directory:
+Mount the sibling `reference/` directory read-only at `/reference` and `run/`
+read-write at `/run`. Prepared local inference needs neither an HF token nor
+an HF cache layout or network. There is no online fallback. Docker also sets
+`HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`.
 
-```bash
-python -m components.person_a.hf_snapshot_manifest \
-  --model-id google/gemma-3-1b-it \
-  --revision dcc83ea841ab6100d6b47a070329e1ba4cf78752 \
-  --snapshot ../run/cache/huggingface/hub/models--google--gemma-3-1b-it/snapshots/dcc83ea841ab6100d6b47a070329e1ba4cf78752 \
-  --output ../run/output/person_a_assets/gemma-3-1b-it.snapshot.json
-```
+Model integrity is always enforced, including when synthetic single-file
+assets use `record_only`. Missing/extra files, size/digest mismatches, wrong
+model identity/revision, or paths escaping the model root stop inference.
+Expected manifests are read afresh; runtime never regenerates its baseline.
+D/G provenance records verified identity, revision, manifest SHA and tree SHA.
+
+Gemma uses the seven-file fixed manifest in `model-manifests/`. MedGemma remains
+`BLOCKED_MISSING_ASSET`: the authorized pinned snapshot and a reviewed fixed
+manifest have not been supplied. CGMH model-invoked inference is blocked until
+both are available; Regex-only paths and public examples remain model-free.
+See [LOCAL_MODELS.md](LOCAL_MODELS.md) for preparation and verification commands.
+
+The checked-in learnable profile caps GPU placement at `1200MiB` and allows
+`12GiB` CPU offload. Plan at least 16 GB host RAM including overhead; this is a
+planning budget, not a measured minimum. The 4 GB GPU placement profile is not
+a certified minimum for both models. GPU inference is required by production
+configs; no production CPU fallback has been qualified.
 
 ## CLI
 
@@ -111,8 +125,7 @@ docker build \
 The default image entrypoint is `report_decompose`:
 
 ```bash
-docker run --rm --gpus all \
-  --env-file integration/.env \
+docker run --rm --gpus all --network none \
   -v "$(pwd)/../reference:/reference:ro" \
   -v "$(pwd)/../run:/run" \
   wlw/person-a:0.9.0 \
