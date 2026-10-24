@@ -83,9 +83,23 @@ print('Image source tree contains no model weights, credentials file or Python c
         }
     }
 
+    # Runtime input loaders enforce /run. Keep configs in /app, but stage
+    # public CaseList/D data beside the generated F and model outputs.
+    $inputRoot = Join-Path $validationRoot 'input'
+    New-Item -ItemType Directory -Path $inputRoot | Out-Null
+    foreach ($filename in @('case_list.valid.json', 'D_dx_pairs.valid.json')) {
+        Copy-Item -LiteralPath (Join-Path $PSScriptRoot "examples/local_model_delivery/$filename") -Destination (Join-Path $inputRoot $filename)
+    }
     $runtimeMounts = @('run', '--rm', '--network', 'none', '--gpus', 'all', '-v', "${referenceRoot}:/reference:ro", '-v', "${validationRoot}:/run", '--entrypoint', 'python', $Image)
-    $example = '/app/components/person_a/examples/local_model_delivery'
+    $example = '/run/input'
     Invoke-DockerCheck -Name 'prepare-smoke-f' -DockerArgs ($runtimeMounts + @('-m', 'components.person_a.prepare_delivery_smoke', '--output', '/run/F.reference-smoke.json'))
+    $inputCheck = @'
+from contracts.runtime import load_case_list_input, load_inputs
+load_case_list_input('/run/input/case_list.valid.json', single_case=True)
+load_inputs(['/run/input/D_dx_pairs.valid.json','/run/F.reference-smoke.json'], ['D.DxPairs','F.Chunks'])
+print('Runtime input paths and schemas PASS')
+'@
+    Invoke-DockerCheck -Name 'runtime-inputs' -DockerArgs ($runtimeMounts + @('-c', $inputCheck))
     Invoke-DockerCheck -Name 'medgemma-real-d' -DockerArgs ($runtimeMounts + @('-m', 'components.person_a.report_decompose', '--input', "$example/case_list.valid.json", '--output', '/run/D.medgemma.json', '--config', '/app/components/person_a/configs/report_decompose.default.json'))
     $check = @'
 import json
