@@ -1,0 +1,20 @@
+assets:
+  - asset_id: person-c-central-breast-mrcps
+    type: model_weight
+    required: true
+    version: "sha256-1f8aa232"
+    revision: "sha256:1f8aa23202e4efda656b227efa1114cea74036f79f6dd0deba20f50bde90b12b"
+    sha256: "1f8aa23202e4efda656b227efa1114cea74036f79f6dd0deba20f50bde90b12b"
+    size_bytes: 153282613
+    license_or_access_policy: "research storage; access managed by dataset owner"
+    contains_phi: false
+    configured_by: "configs/default.json:model.path"
+  - asset_id: person-c-bracs-265-test-wsi
+    type: test_data
+    required: false
+    version: "sha256-49290ba7"
+    revision: "sha256:49290ba7a15005760336be13a769d0ef60e5a6cc040f10292048fa31dc9fdf5d"
+    sha256: "49290ba7a15005760336be13a769d0ef60e5a6cc040f10292048fa31dc9fdf5d"
+    size_bytes: 1865817773
+    license_or_access_policy: "BRACS dataset terms and research storage access apply"
+    purpose: "External real-WSI smoke test only; not included in the component folder"

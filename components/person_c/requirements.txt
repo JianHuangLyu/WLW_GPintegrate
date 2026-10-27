@@ -1,1 +1,7 @@
-# The example stub uses only the Python standard library.
+numpy==2.2.6
+opencv-python-headless==4.12.0.88
+openslide-python==1.4.6
+Pillow==12.0.0
+scikit-image==0.25.2
+scipy==1.15.3
+torch==2.6.0

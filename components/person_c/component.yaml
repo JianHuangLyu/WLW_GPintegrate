@@ -1,10 +1,18 @@
-name: person_c_interest_pattern
+name: interest_pattern_extraction
 owner: person_C
-version: example-stub-0.1.0
+version: 0.4.0
 inputs: [CaseListInput@1.0]
 outputs: [E.ROIs@2.0]
 runtime:
-  python: "3.12"
-  gpu: false
+  python: "3.10"
+  gpu: true
+  cuda_runtime: "11.8 via PyTorch 2.6.0 wheel"
+  minimum_vram_gb: 8
+  cpu: 4
+  memory_gb: 16
+  timeout_seconds: 21600
+models:
+  - name: central-breast-mrcps
+    revision: sha256:1f8aa23202e4efda656b227efa1114cea74036f79f6dd0deba20f50bde90b12b
+    configured_by: configs/default.json:model.path
 entrypoint: python -m components.person_c.interest_pattern
-status: example_stub_not_for_research_use

@@ -1,0 +1,23 @@
+{
+  "component_version": "person-c/interest-pattern:0.4.0",
+  "backend": "mrcps",
+  "stain_type_whitelist": ["HE"],
+  "model": {
+    "path": "../reference/person_c/checkpoint/central_breast_inference.pt",
+    "revision": "sha256:1f8aa23202e4efda656b227efa1114cea74036f79f6dd0deba20f50bde90b12b"
+  },
+  "device": "auto",
+  "patch_size": 512,
+  "stride": 512,
+  "low_resolution_ratio": 8,
+  "batch_size": 8,
+  "check_mpp": 32.0,
+  "postprocess_mpp": 8.0,
+  "background_lower": 10,
+  "background_upper": 240,
+  "background_dilation_kernel": 5,
+  "hole_area_threshold": 1500,
+  "min_object_size": 100,
+  "save_roi_png": false,
+  "roi_output_dir": "../run/output/materialized/person_c/roi-images"
+}
