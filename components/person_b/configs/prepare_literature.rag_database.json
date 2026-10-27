@@ -1,0 +1,6 @@
+{
+  "component_version": "person-b/literature-preparation:0.2.0",
+  "mode": "rag_database",
+  "corpus_id": "who-breast-tumours-5e-rag-database",
+  "corpus_title": "Breast Tumours (5th ed.)"
+}

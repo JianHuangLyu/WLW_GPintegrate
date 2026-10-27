@@ -1,0 +1,23 @@
+{
+  "component_version": "person-a/query-generation:0.9.0",
+  "asset_integrity": "enforce",
+  "histologic_mapping_path": "../reference/person_a/template_ref/Histologic_Type_mappingTable.json",
+  "candidate_reference_path": "../reference/person_a/template_ref/candidateReference.json",
+  "type_level_path": "../reference/person_a/template_ref/[typeLevel]visualAttrs_v1.2.1_2603241656.json",
+  "backend": {
+    "mode": "learnable_soft_prompt",
+    "model_name": "google/gemma-3-1b-it",
+    "model_revision": "dcc83ea841ab6100d6b47a070329e1ba4cf78752",
+    "checkpoint_path": "../reference/person_a/checkpoint/soft_prompt_stage2_64SP_50epoch_chunk_option_conditions_retrieval_mixed_best.pt",
+    "attribute_reference_path": "../reference/person_a/template_ref/chunks_with_attribute_condition.json",
+    "required_chunk_count": 3,
+    "max_input_len": 8192,
+    "max_new_tokens": 8192,
+    "dtype": "auto",
+    "require_cuda": true,
+    "device_map_strategy": "auto_cpu_offload",
+    "gpu_memory_limit": "1200MiB",
+    "cpu_memory_limit": "12GiB",
+    "model_path": "../reference/person_a/checkpoint/gemma-3-1b-it"
+  }
+}

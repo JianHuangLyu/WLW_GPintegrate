@@ -1,0 +1,4 @@
+python -m components.person_c.interest_pattern \
+  --input ../run/input/pipeline/case-001.json \
+  --output ../run/output/work/person-c-example-E.json \
+  --config components/person_c/configs/demo.json

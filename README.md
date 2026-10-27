@@ -4,10 +4,18 @@
 元件與外部資產；其他元件只依賴輸入／輸出 contract、程序 exit code 與檔案路徑，不直接 import
 別人的研究實作。
 
-目前 `person_a`～`person_c` 僅保留可跑通 contract 與 pipeline 的範例 stub，不包含研究方法、模型、
-checkpoint 或正式超參數；`person_d` 提供 PLIP + CONCH visual attribute filter（`mode: native`，見
-`components/person_d/README.md`），其 `mode: example` 仍是 pipeline 使用的 contract stub；`person_e`
-保留 CLEE 整合實作。stub 輸出只可用於介面測試，不得用於研究、診斷、效能評估或 benchmark。
+## 元件狀態
+
+| 元件 | 版本 | 功能 |
+|---|---|---|
+| Person A | 0.9.0 | Report Decomposition / Query Generation |
+| Person B | 0.5.0 | Literature Preparation / Dense Retrieval |
+| Person C | 0.4.0 | MRCPS WSI Interest Pattern Extraction |
+| Person D | 0.2.0 | PLIP + CONCH Visual Attribute Extraction / Matching |
+| Person E | 依現行 component.yaml | CLEE Evidence Selection |
+
+目前各元件已有獨立的研究實作與測試覆蓋，
+但完整正式 native pipeline 尚未通過端到端驗收。
 
 ## 1. 框架與資料流
 

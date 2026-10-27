@@ -1,0 +1,66 @@
+{
+  "contract": "D.DxPairs",
+  "schema_version": "2.0",
+  "artifact_id": "D-example-person-a-example",
+  "case_id": "person-a-example",
+  "producer": "person-a/example:0.9.0",
+  "payload": {
+    "data_mode": "inference",
+    "DxItem_list": ["Example_Diagnostic_Item"],
+    "reference_versions": {
+      "example_stub": {
+        "implemented": false,
+        "purpose": "contract smoke test"
+      }
+    },
+    "case_list": [
+      {
+        "sample_idx": 0,
+        "case_id": "person-a-example",
+        "hospital": "EXAMPLE",
+        "patient_info": {},
+        "date": "",
+        "source": {"fixture": "synthetic"},
+        "organ": "Example",
+        "report_raw_content": "Synthetic report text for contract testing only.",
+        "tissue_blocks": [
+          {
+            "block_id": "A",
+            "stains": [
+              {
+                "stain_id": "person-a-example-he",
+                "stain_type": "HE",
+                "filename": "not-opened.svs",
+                "filepath": "/example/not-opened.svs",
+                "memo": "Synthetic path; example mode never opens it.",
+                "roi_num": 0,
+                "roi_list": []
+              }
+            ],
+            "memo": ""
+          }
+        ],
+        "memo": "",
+        "structured_report": {
+          "reportType": null,
+          "reportSubTypes": [],
+          "DxItems": {
+            "Example_Diagnostic_Item": {
+              "dx_pair_id": "person-a-example-example-dx-001",
+              "source_report_id": "person-a-example-example-report",
+              "DxResultCls": "Not implemented",
+              "DxResultTxt": "Example stub; replace with Person A implementation.",
+              "DxResultRawTxt": null,
+              "referenceBlock": null,
+              "referenceType": [],
+              "referenceWSI": [],
+              "appear_reportTypes": [],
+              "optionTypes": "example",
+              "has_numericalData": false
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "disease_name": "Invasive breast carcinoma of no special type",
+  "sections": [
+    {
+      "section_type": "Histopathology",
+      "page_content": "Synthetic histopathology paragraph for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature."
+    },
+    {
+      "section_type": "Cytology",
+      "page_content": "Synthetic cytology paragraph for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature."
+    },
+    {
+      "section_type": "Essential and desirable diagnostic criteria",
+      "page_content": "Synthetic essential criteria for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature."
+    },
+    {
+      "section_type": "ICD-O coding",
+      "page_content": "None"
+    }
+  ],
+  "images": []
+}

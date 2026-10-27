@@ -352,8 +352,19 @@ def load_case_list_input(path: str | Path, *, single_case: bool = False) -> dict
     return document
 
 
-def write_case_list_input(document: dict[str, Any], output: str | Path) -> None:
-    validate_case_list_input(document, single_case=True)
+def write_case_list_input(
+    document: dict[str, Any],
+    output: str | Path,
+    *,
+    single_case: bool = True,
+) -> None:
+    """Write a canonical CaseList below run/.
+
+    Component handoffs use the single-case default. The upstream B-to-CaseList
+    adapter explicitly opts into a multi-case batch for pipeline fan-out.
+    """
+
+    validate_case_list_input(document, single_case=single_case)
     path = resolve_run_path(output)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

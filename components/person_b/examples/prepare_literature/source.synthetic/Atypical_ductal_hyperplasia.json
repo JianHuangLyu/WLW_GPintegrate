@@ -1,0 +1,22 @@
+{
+  "disease_name": "Atypical ductal hyperplasia",
+  "sections": [
+    {
+      "section_type": "Histopathology",
+      "page_content": "Synthetic histopathology paragraph for Atypical ductal hyperplasia (ADH). Written for contract testing only; it is not literature."
+    },
+    {
+      "section_type": "Cytology",
+      "page_content": "Synthetic cytology paragraph for Atypical ductal hyperplasia (ADH). Written for contract testing only; it is not literature."
+    },
+    {
+      "section_type": "Essential and desirable diagnostic criteria",
+      "page_content": "Synthetic essential criteria for Atypical ductal hyperplasia (ADH). Written for contract testing only; it is not literature."
+    },
+    {
+      "section_type": "ICD-O coding",
+      "page_content": "None"
+    }
+  ],
+  "images": []
+}

@@ -1,0 +1,27 @@
+{
+  "component_version": "person-a/report-decompose:0.9.0",
+  "asset_integrity": "enforce",
+  "dx_candidates_path": "../reference/person_a/template_ref/DxStructuredCandidates_integrated.json",
+  "report_extraction": {
+    "enabled": true,
+    "backend": "hospital_routed",
+    "only_when_missing": true,
+    "strict_result_classes": true,
+    "item_name_map": {},
+    "result_class_map": {},
+    "medgemma": {
+      "model_id": "google/medgemma-1.5-4b-it",
+      "model_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+      "require_cuda": true,
+      "load_in_4bit": true,
+      "enable_cpu_offload": true,
+      "device_map_strategy": "text_gpu_vision_cpu",
+      "compute_dtype": "auto",
+      "chunk_chars": 3000,
+      "overlap": 300,
+      "max_input_tokens": 2048,
+      "max_new_tokens": 512,
+      "model_path": "../reference/person_a/checkpoint/medgemma-1.5-4b-it"
+    }
+  }
+}

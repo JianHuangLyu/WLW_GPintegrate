@@ -1,0 +1,26 @@
+{
+  "contract": "F.Chunks",
+  "schema_version": "2.0",
+  "artifact_id": "F-example-person-a-example",
+  "case_id": "person-a-example",
+  "producer": "person-b/example:0.1.0",
+  "payload": {
+    "corpus_id": "synthetic-corpus",
+    "knowledge_base": {
+      "knowledge_base_id": "example-not-built",
+      "archive_path": "example://not-created",
+      "archive_sha256": "not-applicable",
+      "corpus_sha256": "synthetic",
+      "embedding_model_path": "example://not-configured",
+      "embedding_model_sha256": "not-applicable",
+      "document_count": 1,
+      "max_tokens": 1,
+      "query_max_tokens": 1,
+      "retrieval_mode": "sparse",
+      "top_k": 1,
+      "candidate_k": 1,
+      "hybrid_weights": {"dense": 0.0, "sparse": 1.0}
+    },
+    "chunks": []
+  }
+}

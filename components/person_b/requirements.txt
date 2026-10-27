@@ -1,1 +1,10 @@
-# The example stub uses only the Python standard library.
+# mode=example (the shared contract example) needs only the standard library.
+# mode=dense (configs/dense.default.json) needs the packages below.
+# torch is pinned separately in the Dockerfile (it uses its own wheel index).
+#
+# Versions are the ones the dense backend was actually run with
+# (abhinand/MedEmbed-large-v0.1, torch 2.6.0+cu124, Python 3.13).
+# Verified in the Docker image too (Python 3.12.15).
+numpy==2.5.3
+sentence-transformers==6.1.0
+transformers==5.17.0

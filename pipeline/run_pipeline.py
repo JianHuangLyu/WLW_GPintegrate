@@ -134,8 +134,8 @@ def main() -> None:
         completed_cases.append(
             {
                 "case_id": case_id,
-                "case_input_path": str(case_input.relative_to(artifacts)),
-                "selected_rois_path": str(selected_rois.relative_to(artifacts)),
+                "case_input_path": case_input.relative_to(artifacts).as_posix(),
+                "selected_rois_path": selected_rois.relative_to(artifacts).as_posix(),
             }
         )
 

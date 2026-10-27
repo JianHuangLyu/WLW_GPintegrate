@@ -1,0 +1,30 @@
+{
+  "component_version": "person-b/knowledge-retrieval:0.5.0",
+  "mode": "dense",
+  "knowledge_base": {
+    "knowledge_base_id": "kb-who-breast-5e-medembed-v1",
+    "path": "reference/person_b/checkpoint/kb-who-breast-5e-medembed-v1"
+  },
+  "embedding": {
+    "provider": "sentence_transformers",
+    "model_path": "reference/person_b/checkpoint/embedding-model-medembed-large-v0.1",
+    "device": "auto",
+    "dtype": null,
+    "batch_size": 16,
+    "max_tokens": null,
+    "query_max_tokens": 128
+  },
+  "retrieval": {
+    "dx_items": ["Histologic_Type"],
+    "top_k": 3,
+    "candidate_k": 3,
+    "min_chunks": 3,
+    "queries": {
+      "UDH": "the Histopathology, Cytology, and Essential diagnostic criteria of Usual Ductal Hyperplasia (UDH)",
+      "ADH": "the Histopathology, Cytology, and Essential diagnostic criteria of Atypical ductal hyperplasia (ADH)",
+      "DCIS": "the Histopathology, Cytology, and Essential diagnostic criteria of Ductal carcinoma in situ (DCIS)",
+      "FEA": "the Histopathology, Cytology, and Essential diagnostic criteria of Flat epithelial atypia (FEA)",
+      "IC": "the Histopathology, Cytology, and Essential diagnostic criteria of Invasive breast carcinoma of no special type (IBC-NST)"
+    }
+  }
+}
