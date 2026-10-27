@@ -1,12 +1,28 @@
 name: person_b_literature_and_retrieval
 owner: person_B
-version: example-stub-0.1.0
+version: 0.5.0
 inputs: [A.Literature@2.0, D.DxPairs@2.0]
 outputs: [A.Literature@2.0, F.Chunks@2.0]
 runtime:
   python: "3.12"
-  gpu: false
+  gpu: true              # optional: embedding.device=auto falls back to CPU
+  gpu_count: 1
+  cuda: "12.4"
+  torch: "2.6.0+cu124"
+  cpu: 2
+  memory_gb: 4
+models:
+  - id: abhinand/MedEmbed-large-v0.1   # BERT-large, 512-token limit
+    mount: reference/person_b/checkpoint/embedding-model-medembed-large-v0.1
+    revision: 963121bfb9c625475f65b08fb54990ce9c4e7a1a
+knowledge_base:
+  id: kb-who-breast-5e-medembed-v1
+  mount: reference/person_b/checkpoint/kb-who-breast-5e-medembed-v1
+  retrieval_mode: dense
+corpus:
+  source_format: rag_database@1
+  mount: reference/person_b/checkpoint/rag_database
 entrypoints:
-  - python -m components.person_b.prepare_literature
-  - python -m components.person_b.knowledge_retrieval
-status: example_stub_not_for_research_use
+  - python -m components.person_b.prepare_literature      # --source <rag_database dir>
+  - python -m components.person_b.build_knowledge_base    # A -> index
+  - python -m components.person_b.knowledge_retrieval     # A + D -> F

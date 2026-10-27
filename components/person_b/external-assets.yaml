@@ -1,0 +1,101 @@
+# External assets of Person B. None of them is committed or copied into the Docker image; they are
+# mounted below the sibling `reference/` directory (compose: ../../reference -> /reference:ro).
+#
+# Digest algorithms (the runtime recomputes the model and knowledge-base digests before every query
+# and fails on a mismatch; see components/person_b/dense.py):
+#   files_sha256(root, names) = sha256 over, for each name in sorted order, the text
+#                               "<name>\0<sha256 of the file>\n"
+#   directory_sha256(root)    = files_sha256 over every file below root (relative posix paths)
+#
+# The A.Literature artifact (run/input/pipeline/A_literature.json) is derived from the corpus asset
+# by `prepare_literature` and is not an external asset: regenerate it, do not copy it.
+assets:
+  - asset_id: rag-database-who-breast-tumours-5e
+    type: corpus_snapshot
+    required: true
+    version: "rag_database@1"
+    revision: "sha256-ffd76f0893866aad7b2dd0f71bce76c90d1de8faf245eb2414a500637c01bc30"
+    sha256: "ffd76f0893866aad7b2dd0f71bce76c90d1de8faf245eb2414a500637c01bc30"
+    size_bytes: 1062669
+    logical_path: "reference/person_b/checkpoint/rag_database"
+    configured_by: "run prepare_literature with --source <logical_path> and configs/prepare_literature.rag_database.json"
+    license_or_access_policy: "UNCONFIRMED, RESTRICTED. Text (and image captions) of the WHO Classification of Tumours, Breast Tumours (5th ed.), obtained by the lab through its subscription account. The IARC copyright notice linked from the site's welcome page ('(c) IARC 2026, All Rights Reserved') allows extracts to be reproduced for research or private study, not for sale or commercial use, with IARC acknowledged as the source and the URL cited; reproduction of substantial portions, or any use other than educational or other non-commercial purposes, requires explicit prior written authorization. This snapshot (87 diseases, 1349 sections) is a substantial portion, and no written authorization for sharing it outside the lab has been obtained. The lab's subscription agreement has not been checked. Do not republish; do not commit; share only through access-controlled reference storage once authorization or the lab's approval is in place."
+    permission_contact: "com@iarc.fr (as given in the IARC copyright notice)"
+    attribution_required: "International Agency for Research on Cancer (IARC), WHO Classification of Tumours Online, https://tumourclassification.iarc.who.int"
+    contains_phi: false
+    depends_on: []
+    content:
+      format: "one <disease>.json per disease: {disease_name, sections[{section_type, page_content}], images}; images are ignored"
+      json_files: 87
+      sections: 1349
+      literal_none_sections: 93
+      indexed_sections: 1256
+      skipped_files: "18 empty files without a .json extension (chapter placeholders, 0 bytes each)"
+    verification:
+      algorithm: "sha256 over, for each *.json file in file-name string order, '<file name>\\0<raw bytes>\\0' (build_literature_artifact_from_rag_database)"
+      check: "prepare_literature writes this value as payload.corpus.sha256 of A.Literature"
+    provenance:
+      source: "WHO Classification of Tumours Online (https://tumourclassification.iarc.who.int), Breast Tumours 5th ed."
+      acquired_by: "the lab, logged in with its subscription account and extracted the pages with a scraper"
+      date_of_extraction: "not recorded"
+      images: "only metadata is present (id, diagnosis, legend, contributor name in 'source'); the image files are not part of this asset"
+    notes: "The subscription agreement has not been read against this use; it may be stricter than the public copyright notice. The image captions name individual contributors (for example 'Maria Pia Foschini', 'SGH Pathology'), whose rights may differ from those of the text."
+
+  - asset_id: medembed-large-v0.1
+    type: model_weight
+    required: true
+    version: "v0.1"
+    revision: "963121bfb9c625475f65b08fb54990ce9c4e7a1a"
+    sha256: "a31db9d8ad309438808f3e5faf1af7425f4192c679aa091f0514f647860554c5"
+    size_bytes: 1341558915
+    logical_path: "reference/person_b/checkpoint/embedding-model-medembed-large-v0.1"
+    configured_by: "configs/dense.default.json:embedding.model_path"
+    license_or_access_policy: "Apache-2.0 (Hugging Face model card); public, not gated. Base model: BAAI/bge-large-en-v1.5."
+    contains_phi: false
+    depends_on: []
+    source:
+      repository: "https://huggingface.co/abhinand/MedEmbed-large-v0.1"
+      how_to_obtain: "Download the snapshot at the revision above and copy every file except README.md into logical_path (README.md is not part of the digest)."
+    verification:
+      tree_hash_algorithm: "directory_sha256 (see header)"
+      model_max_tokens: 512
+      embedding_dimension: 1024
+      required_files_sha256:
+        "1_Pooling/config.json": "13e69897522ee8255104483ed9f219465d1be3936654a54a318758738052789e"
+        "config.json": "cb421a122dde11b5741161d037cf1736f31e4c4d85892c283c1ff1cba18fc2da"
+        "config_sentence_transformers.json": "de3d0f96c7851b68af569a091ceb9d550e4c9f97e57c3b3e5be0a8cfc7b549cd"
+        "model.safetensors": "d22fc6a03d40f5d84634a07201d5d272b90f9b17ac2f75a548807e141499cde0"
+        "modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf"
+        "sentence_bert_config.json": "ec8e29d6dcb61b611b7d3fdd2982c4524e6ad985959fa7194eacfb655a8d0d51"
+        "special_tokens_map.json": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a"
+        "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
+        "tokenizer_config.json": "0b29c7bfc889e53b36d9dd3e686dd4300f6525110eaa98c76a5dafceb2029f53"
+        "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+
+  - asset_id: kb-who-breast-5e-medembed-v1
+    type: knowledge_base_index
+    required: true
+    version: "kb_schema_version 2.0"
+    revision: "kb-who-breast-5e-medembed-v1 (built 2026-10-05T19:05:23Z)"
+    sha256: "f762740d56faddca51e8a9c83d8302a68d9d644eb3b4dc1e6916ebe4de0a74b9"
+    size_bytes: 5294529
+    logical_path: "reference/person_b/checkpoint/kb-who-breast-5e-medembed-v1"
+    configured_by: "configs/dense.default.json:knowledge_base.path"
+    license_or_access_policy: "Derived from the corpus asset (embeddings and section texts index): inherits the corpus access policy above, which is unconfirmed."
+    contains_phi: false
+    depends_on:
+      - asset_id: rag-database-who-breast-tumours-5e
+        sha256: "ffd76f0893866aad7b2dd0f71bce76c90d1de8faf245eb2414a500637c01bc30"
+      - asset_id: medembed-large-v0.1
+        sha256: "a31db9d8ad309438808f3e5faf1af7425f4192c679aa091f0514f647860554c5"
+    build:
+      command: "python -m components.person_b.build_knowledge_base --input <A_literature.json> --config components/person_b/configs/dense.default.json"
+      settings: "section-level documents, 1256 sections x 1024 dims, fp32, max_tokens 512, L2-normalised"
+      libraries: "torch 2.6.0+cu124, sentence-transformers 6.1.0, transformers 5.17.0, numpy 2.5.3"
+      rebuild_note: "Rebuilding on another machine can change embeddings.npy bytes (and therefore this digest) through floating point differences; the runtime then rejects the index until the digest is regenerated in the manifest."
+    verification:
+      archive_sha256_algorithm: "files_sha256 over embeddings.npy and sections.json (manifest.json is excluded because it records the digest)"
+      required_files_sha256:
+        "embeddings.npy": "f77ddc1569921b7b7f0dcb307a5f5912ae87480e5425007dc81f36a4909001ee"
+        "sections.json": "5f5ab569b6f140e613eff61160332d67a539200f7c932f2744a7798687aa80b7"
+        "manifest.json": "a7e0120367ac95552835bc7619b7a7a7506e442d0873d6f89241d8b6c61b41b8"

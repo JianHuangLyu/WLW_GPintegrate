@@ -1,0 +1,70 @@
+{
+  "contract": "D.DxPairs",
+  "schema_version": "2.0",
+  "artifact_id": "D-example-example-case",
+  "case_id": "example-case",
+  "producer": "person-a/example-stub:0.1.0",
+  "payload": {
+    "data_mode": "inference",
+    "DxItem_list": [
+      "Histologic_Type"
+    ],
+    "reference_versions": {
+      "example_stub": {
+        "implemented": false,
+        "purpose": "contract smoke test"
+      }
+    },
+    "case_list": [
+      {
+        "sample_idx": 0,
+        "case_id": "example-case",
+        "hospital": "EXAMPLE",
+        "patient_info": {},
+        "date": "",
+        "source": {
+          "fixture": "synthetic"
+        },
+        "organ": "Example",
+        "report_raw_content": "Synthetic report text for contract testing only.",
+        "tissue_blocks": [
+          {
+            "block_id": "example-block",
+            "stains": [
+              {
+                "stain_id": "example-stain",
+                "stain_type": "EXAMPLE",
+                "filename": "not-opened.example",
+                "filepath": "/example/not-opened.example",
+                "memo": "The example stubs do not access this path.",
+                "roi_num": 0,
+                "roi_list": []
+              }
+            ],
+            "memo": ""
+          }
+        ],
+        "memo": "",
+        "structured_report": {
+          "reportType": null,
+          "reportSubTypes": [],
+          "DxItems": {
+            "Histologic_Type": {
+              "dx_pair_id": "example-case-example-dx-001",
+              "source_report_id": "example-case-example-report",
+              "DxResultCls": "IC",
+              "DxResultTxt": "Synthetic invasive carcinoma of no special type (contract example).",
+              "DxResultRawTxt": null,
+              "referenceBlock": null,
+              "referenceType": [],
+              "referenceWSI": [],
+              "appear_reportTypes": [],
+              "optionTypes": "example",
+              "has_numericalData": false
+            }
+          }
+        }
+      }
+    ]
+  }
+}

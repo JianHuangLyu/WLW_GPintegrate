@@ -1,0 +1,105 @@
+{
+  "contract": "F.Chunks",
+  "schema_version": "2.0",
+  "artifact_id": "F-example-case",
+  "case_id": "example-case",
+  "producer": "person-b/knowledge-retrieval:example",
+  "payload": {
+    "corpus_id": "synthetic-breast-example-v1",
+    "knowledge_base": {
+      "knowledge_base_id": "kb-example-hashing",
+      "archive_path": "reference/person_b/checkpoint/kb-example-hashing",
+      "archive_sha256": "aba995b4d4e4ef207326570bb201f505998a675009ea2065dd95e97625bfbdb1",
+      "corpus_sha256": "2b83b997b5dee6423b11cc3af526c41e85a8b5f5dc322e69ca76b676b2ae2447",
+      "embedding_model_path": "example://hashing-bow",
+      "embedding_model_sha256": "8914afd8f537d8a0db099d35a3035f8bfbbb220422144d3a7bca4e68e85077b5",
+      "document_count": 15,
+      "max_tokens": 512,
+      "query_max_tokens": 128,
+      "retrieval_mode": "dense",
+      "top_k": 3,
+      "candidate_k": 3,
+      "hybrid_weights": {
+        "dense": 1.0,
+        "sparse": 0.0
+      }
+    },
+    "chunks": [
+      {
+        "chunk_id": "example-case-chunk-001",
+        "dx_pair_id": "example-case-example-dx-001",
+        "literature_id": "lit-97b79a1eb414b2ac",
+        "section_id": "sec-d10f7eceadb0b7ec",
+        "source_idx": 3,
+        "section_idx": 2,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Invasive breast carcinoma of no special type"
+        ],
+        "literature_title": "Invasive breast carcinoma of no special type",
+        "section_title": "Essential and desirable diagnostic criteria",
+        "source_href": null,
+        "text": "Synthetic essential criteria for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature.",
+        "indexed_token_count": 37,
+        "retrieval_rank": 1,
+        "dense_score": 0.732926,
+        "dense_rank": 1,
+        "sparse_score": null,
+        "sparse_rank": null,
+        "relevance_score": 0.733
+      },
+      {
+        "chunk_id": "example-case-chunk-002",
+        "dx_pair_id": "example-case-example-dx-001",
+        "literature_id": "lit-97b79a1eb414b2ac",
+        "section_id": "sec-4077ec6c38c222d9",
+        "source_idx": 3,
+        "section_idx": 0,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Invasive breast carcinoma of no special type"
+        ],
+        "literature_title": "Invasive breast carcinoma of no special type",
+        "section_title": "Histopathology",
+        "source_href": null,
+        "text": "Synthetic histopathology paragraph for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature.",
+        "indexed_token_count": 33,
+        "retrieval_rank": 2,
+        "dense_score": 0.679236,
+        "dense_rank": 2,
+        "sparse_score": null,
+        "sparse_rank": null,
+        "relevance_score": 0.679
+      },
+      {
+        "chunk_id": "example-case-chunk-003",
+        "dx_pair_id": "example-case-example-dx-001",
+        "literature_id": "lit-97b79a1eb414b2ac",
+        "section_id": "sec-e1a23da338834009",
+        "source_idx": 3,
+        "section_idx": 1,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Invasive breast carcinoma of no special type"
+        ],
+        "literature_title": "Invasive breast carcinoma of no special type",
+        "section_title": "Cytology",
+        "source_href": null,
+        "text": "Synthetic cytology paragraph for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature.",
+        "indexed_token_count": 33,
+        "retrieval_rank": 3,
+        "dense_score": 0.588663,
+        "dense_rank": 3,
+        "sparse_score": null,
+        "sparse_rank": null,
+        "relevance_score": 0.589
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "component_version": "person-b/literature-preparation:example",
+  "mode": "rag_database",
+  "corpus_id": "synthetic-breast-example-v1",
+  "corpus_title": "Synthetic contract example"
+}

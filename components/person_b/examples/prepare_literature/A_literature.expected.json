@@ -1,0 +1,214 @@
+{
+  "contract": "A.Literature",
+  "schema_version": "2.0",
+  "artifact_id": "A-synthetic-breast-example-v1",
+  "producer": "person-b/literature-preparation:example",
+  "payload": {
+    "corpus": {
+      "corpus_id": "synthetic-breast-example-v1",
+      "title": "Synthetic contract example",
+      "source_file": "source.synthetic",
+      "source_path": "repo://components/person_b/examples/prepare_literature/source.synthetic",
+      "sha256": "2b83b997b5dee6423b11cc3af526c41e85a8b5f5dc322e69ca76b676b2ae2447",
+      "source_size_bytes": 4186,
+      "literature_count": 5
+    },
+    "literature_list": [
+      {
+        "literature_id": "lit-bf84722d13e2a771",
+        "source_idx": 0,
+        "level": 3,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Atypical ductal hyperplasia"
+        ],
+        "title": "Atypical ductal hyperplasia",
+        "href": null,
+        "sections": [
+          {
+            "section_id": "sec-d0af39a5e23905a4",
+            "section_idx": 0,
+            "title": "Histopathology",
+            "text": "Synthetic histopathology paragraph for Atypical ductal hyperplasia (ADH). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-b07629b151d4bb53",
+            "section_idx": 1,
+            "title": "Cytology",
+            "text": "Synthetic cytology paragraph for Atypical ductal hyperplasia (ADH). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-154ff8a767f4a16e",
+            "section_idx": 2,
+            "title": "Essential and desirable diagnostic criteria",
+            "text": "Synthetic essential criteria for Atypical ductal hyperplasia (ADH). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-52af17e6c73d179b",
+            "section_idx": 3,
+            "title": "ICD-O coding",
+            "text": "None"
+          }
+        ]
+      },
+      {
+        "literature_id": "lit-6d72a6f629c8de69",
+        "source_idx": 1,
+        "level": 3,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Ductal carcinoma in situ"
+        ],
+        "title": "Ductal carcinoma in situ",
+        "href": null,
+        "sections": [
+          {
+            "section_id": "sec-d332c5a6285b58f4",
+            "section_idx": 0,
+            "title": "Histopathology",
+            "text": "Synthetic histopathology paragraph for Ductal carcinoma in situ (DCIS). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-d65760e01ba542a4",
+            "section_idx": 1,
+            "title": "Cytology",
+            "text": "Synthetic cytology paragraph for Ductal carcinoma in situ (DCIS). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-a600e379547b4148",
+            "section_idx": 2,
+            "title": "Essential and desirable diagnostic criteria",
+            "text": "Synthetic essential criteria for Ductal carcinoma in situ (DCIS). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-3b0ea7f8b1f58f38",
+            "section_idx": 3,
+            "title": "ICD-O coding",
+            "text": "None"
+          }
+        ]
+      },
+      {
+        "literature_id": "lit-8b5417710fb644ff",
+        "source_idx": 2,
+        "level": 3,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Columnar cell lesions, including flat epithelial atypia"
+        ],
+        "title": "Columnar cell lesions, including flat epithelial atypia",
+        "href": null,
+        "sections": [
+          {
+            "section_id": "sec-283f8a4f86845794",
+            "section_idx": 0,
+            "title": "Histopathology",
+            "text": "Synthetic histopathology paragraph for Columnar cell lesions, including flat epithelial atypia (FEA). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-cab536871ed3b6e2",
+            "section_idx": 1,
+            "title": "Cytology",
+            "text": "Synthetic cytology paragraph for Columnar cell lesions, including flat epithelial atypia (FEA). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-3ba029c4b512d131",
+            "section_idx": 2,
+            "title": "Essential and desirable diagnostic criteria",
+            "text": "Synthetic essential criteria for Columnar cell lesions, including flat epithelial atypia (FEA). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-4d73afe8ab0fa0e0",
+            "section_idx": 3,
+            "title": "ICD-O coding",
+            "text": "None"
+          }
+        ]
+      },
+      {
+        "literature_id": "lit-97b79a1eb414b2ac",
+        "source_idx": 3,
+        "level": 3,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Invasive breast carcinoma of no special type"
+        ],
+        "title": "Invasive breast carcinoma of no special type",
+        "href": null,
+        "sections": [
+          {
+            "section_id": "sec-4077ec6c38c222d9",
+            "section_idx": 0,
+            "title": "Histopathology",
+            "text": "Synthetic histopathology paragraph for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-e1a23da338834009",
+            "section_idx": 1,
+            "title": "Cytology",
+            "text": "Synthetic cytology paragraph for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-d10f7eceadb0b7ec",
+            "section_idx": 2,
+            "title": "Essential and desirable diagnostic criteria",
+            "text": "Synthetic essential criteria for Invasive breast carcinoma of no special type (IBC-NST). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-01dc92ef1adb350c",
+            "section_idx": 3,
+            "title": "ICD-O coding",
+            "text": "None"
+          }
+        ]
+      },
+      {
+        "literature_id": "lit-0e5c202dd54556ff",
+        "source_idx": 4,
+        "level": 3,
+        "title_list": [
+          "Synthetic contract example",
+          null,
+          null,
+          "Usual ductal hyperplasia"
+        ],
+        "title": "Usual ductal hyperplasia",
+        "href": null,
+        "sections": [
+          {
+            "section_id": "sec-db375afad2b443c3",
+            "section_idx": 0,
+            "title": "Histopathology",
+            "text": "Synthetic histopathology paragraph for Usual ductal hyperplasia (UDH). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-ccd3bfdd7f0dd9f2",
+            "section_idx": 1,
+            "title": "Cytology",
+            "text": "Synthetic cytology paragraph for Usual ductal hyperplasia (UDH). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-7d0d77cdea826294",
+            "section_idx": 2,
+            "title": "Essential and desirable diagnostic criteria",
+            "text": "Synthetic essential criteria for Usual ductal hyperplasia (UDH). Written for contract testing only; it is not literature."
+          },
+          {
+            "section_id": "sec-faf3f7ae4bcabce9",
+            "section_idx": 3,
+            "title": "ICD-O coding",
+            "text": "None"
+          }
+        ]
+      }
+    ]
+  }
+}
