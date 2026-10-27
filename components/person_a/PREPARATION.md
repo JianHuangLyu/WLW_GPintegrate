@@ -1,7 +1,7 @@
 # 甲（Person A）：Report Decompose／Query Generation 準備與交付
 
-甲負責兩個獨立 executable。目前目錄內只有 contract stub；交付正式版本時應替換內部邏輯，但保留
-module 名稱、Unified CLI、單案行為與 schema version。共通規則見專案根目錄 `README.md`。
+甲負責兩個獨立 executable。正式實作必須保留 module 名稱、Unified CLI、單案行為與 schema
+version。共通規則見專案根目錄 `README.md`，目前實作方式見同目錄 `README.md`。
 
 ## 1. Input／output 規格
 
@@ -187,7 +187,7 @@ Canonical schemas：
 
 ```text
 WLW_GPintegrate/components/person_a/       # 程式、Dockerfile、requirements、文件、非敏感 config
-reference/person_a/checkpoint/             # 模型或權重；若沒有模型則可不建立
+reference/person_a/checkpoint/             # 正式 MedGemma／Gemma 本地模型目錄與 soft prompt
 reference/person_a/template_ref/           # 診斷候選、mapping、vocabulary 等外部參考
 run/input/                                 # CaseList、D、F
 run/output/                                # D、G、暫存與測試產物
@@ -197,6 +197,19 @@ run/output/                                # D、G、暫存與測試產物
 - 超參數、feature flag 與 logical path 放在 `configs/`，不得散落於 Python 常數。
 - 模型、reference table、院端資料與 credential 不得進 Git 或 image。
 - 外部資產須在 `external-assets.yaml` 列出名稱、revision、SHA-256、授權與預期 mount path。
+- 正式 config 使用 `asset_integrity: enforce`；路徑未宣告或 SHA-256 不符時必須停止。
+- 正式模型路徑固定為 `checkpoint/gemma-3-1b-it/` 與 `checkpoint/medgemma-1.5-4b-it/`；
+  來源 ID、revision、預期 mount path 與可信 tree manifest 記錄在 `external-assets.yaml`。
+- 模型載入前必須核對固定 manifest 的 SHA、model ID／revision、完整檔案清單、size、SHA-256；
+  symlink 或相對路徑不得逃出模型 root。manifest 每次驗證重新讀取，不沿用舊快取。
+- 模型使用 `from_pretrained(model_path, local_files_only=True)`；本地推論不要求 HF token，
+  也不下載或回退線上 ID。`record_only` 不會停用模型完整性驗證。
+- D/G 的 `reference_versions` 保存實際模型驗證結果；沒有呼叫模型時不宣稱已驗證模型。
+- MedGemma 的可信十五檔 manifest 已依官方固定 revision 建立；模型本體仍須以授權方式另行交付。
+  缺檔不能視為通過。使用 `validate_local_delivery.ps1` 完成新版 Docker／離線／模型驗收，
+  以產生的 `acceptance-summary.json` 與實測報告為準。準備步驟見 `LOCAL_MODELS.md`。
+- RAM 規劃 16 GB（Gemma CPU offload 可用至 12 GiB，另留 overhead），不是已驗證最低需求；
+  4 GB VRAM 也不是兩個模型共同的已認證最低規格。
 - runtime 只寫入 sibling `run/`；不得在 component 或 `reference/` 下產生 cache。
 
 ## 4. Unified CLI
@@ -236,11 +249,11 @@ python -m components.person_a.query_generation \
 
 ## 5. Dockerfile／requirements.txt
 
-目前 stub 使用 Python 3.12、CPU 與 standard library。正式交付必須更新 `component.yaml`、Dockerfile、
-requirements 與 README，使其共同描述實際 Python、NLP/LLM framework、CPU/GPU 與 RAM/VRAM 需求。
+正式 runtime 由 `component.yaml`、Dockerfile、requirements 與 README 共同宣告 Python、NLP/LLM
+framework、CPU/GPU 與 RAM/VRAM 需求。
 
 ```bash
-docker build --no-cache \
+docker build \
   -f components/person_a/Dockerfile \
   -t wlw/person-a:<version> .
 ```
@@ -257,18 +270,17 @@ components/person_a/examples/
 ├── report_decompose/
 │   ├── case_list.valid.json
 │   ├── D_dx_pairs.expected.json
-│   ├── config.example.json
 │   └── README.md
 └── query_generation/
     ├── D_dx_pairs.valid.json
     ├── F_chunks.valid.json
     ├── G_queries.expected.json
-    ├── config.example.json
     └── README.md
 ```
 
 範例不得包含 PHI、院端原始報告或私有 mapping；使用合成內容並確保 expected output 可重現且通過
-canonical schema。另至少加入一個 invalid input，驗證元件會 non-zero fail。
+canonical schema。兩組範例共用合法路徑下的 `components/person_a/configs/example.json`。另至少加入一個
+invalid input，並以 subprocess 執行正式 CLI，驗證元件會 non-zero fail 且不留下部分輸出。
 
 ## 7. README 必填資訊
 

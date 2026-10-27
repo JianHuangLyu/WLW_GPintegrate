@@ -1,0 +1,1 @@
+"""Person A component tests."""

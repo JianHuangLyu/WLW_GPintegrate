@@ -1,0 +1,105 @@
+{
+  "contract": "F.Chunks",
+  "schema_version": "2.0",
+  "artifact_id": "F-case-001",
+  "case_id": "case-001",
+  "producer": "test",
+  "payload": {
+    "corpus_id": "test-corpus",
+    "chunks": [
+      {
+        "chunk_id": "case-001-chunk-001",
+        "dx_pair_id": "case-001-dx-001",
+        "literature_id": "literature-001",
+        "section_id": "section-001",
+        "source_idx": 0,
+        "section_idx": 0,
+        "title_list": [
+          "Breast",
+          "ADH",
+          null,
+          null
+        ],
+        "literature_title": "Deidentified reference",
+        "section_title": "Histopathology",
+        "source_href": null,
+        "text": "Reference evidence 1",
+        "retrieval_rank": 1,
+        "relevance_score": 1.0,
+        "indexed_token_count": 3,
+        "dense_score": null,
+        "dense_rank": null,
+        "sparse_score": 1.0,
+        "sparse_rank": 1
+      },
+      {
+        "chunk_id": "case-001-chunk-002",
+        "dx_pair_id": "case-001-dx-001",
+        "literature_id": "literature-001",
+        "section_id": "section-002",
+        "source_idx": 0,
+        "section_idx": 1,
+        "title_list": [
+          "Breast",
+          "ADH",
+          null,
+          null
+        ],
+        "literature_title": "Deidentified reference",
+        "section_title": "Histopathology",
+        "source_href": null,
+        "text": "Reference evidence 2",
+        "retrieval_rank": 2,
+        "relevance_score": 1.0,
+        "indexed_token_count": 3,
+        "dense_score": null,
+        "dense_rank": null,
+        "sparse_score": 1.0,
+        "sparse_rank": 2
+      },
+      {
+        "chunk_id": "case-001-chunk-003",
+        "dx_pair_id": "case-001-dx-001",
+        "literature_id": "literature-001",
+        "section_id": "section-003",
+        "source_idx": 0,
+        "section_idx": 2,
+        "title_list": [
+          "Breast",
+          "ADH",
+          null,
+          null
+        ],
+        "literature_title": "Deidentified reference",
+        "section_title": "Histopathology",
+        "source_href": null,
+        "text": "Reference evidence 3",
+        "retrieval_rank": 3,
+        "relevance_score": 1.0,
+        "indexed_token_count": 3,
+        "dense_score": null,
+        "dense_rank": null,
+        "sparse_score": 1.0,
+        "sparse_rank": 3
+      }
+    ],
+    "knowledge_base": {
+      "knowledge_base_id": "example-not-built",
+      "archive_path": "example://not-created",
+      "archive_sha256": "not-applicable",
+      "corpus_sha256": "synthetic",
+      "embedding_model_path": "example://not-configured",
+      "embedding_model_sha256": "not-applicable",
+      "document_count": 1,
+      "max_tokens": 256,
+      "query_max_tokens": 128,
+      "retrieval_mode": "sparse",
+      "top_k": 3,
+      "candidate_k": 3,
+      "hybrid_weights": {
+        "dense": 0.0,
+        "sparse": 1.0
+      }
+    }
+  }
+}

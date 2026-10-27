@@ -1,0 +1,9 @@
+{
+  "DxItem_list": ["Example_Diagnostic_Item"],
+  "case_list": [
+    {
+      "case_id": "invalid-case",
+      "structured_report": {}
+    }
+  ]
+}
